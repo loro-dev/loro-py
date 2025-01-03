@@ -2,6 +2,7 @@ use std::collections::HashMap;
 
 use loro::PeerID;
 use pyo3::prelude::*;
+use pyo3_stub_gen::derive::*;
 
 use crate::value::LoroValue;
 
@@ -10,9 +11,11 @@ pub fn register_class(m: &Bound<'_, PyModule>) -> PyResult<()> {
     Ok(())
 }
 
+#[gen_stub_pyclass]
 #[pyclass]
 pub struct Awareness(loro::awareness::Awareness);
 
+#[gen_stub_pymethods]
 #[pymethods]
 impl Awareness {
     #[new]
@@ -28,8 +31,8 @@ impl Awareness {
         self.0.encode_all()
     }
 
-    pub fn apply(&mut self, encoded_peers_info: &[u8]) -> AwarenessPeerUpdate {
-        let (updated, added) = self.0.apply(encoded_peers_info);
+    pub fn apply(&mut self, encoded_peers_info: Vec<u8>) -> AwarenessPeerUpdate {
+        let (updated, added) = self.0.apply(&encoded_peers_info);
         AwarenessPeerUpdate { updated, added }
     }
 
@@ -65,12 +68,14 @@ impl Awareness {
     }
 }
 
+#[gen_stub_pyclass]
 #[derive(Debug, Clone, IntoPyObject)]
 pub struct AwarenessPeerUpdate {
     pub updated: Vec<PeerID>,
     pub added: Vec<PeerID>,
 }
 
+#[gen_stub_pyclass]
 #[derive(Debug, Clone, IntoPyObject)]
 pub struct PeerInfo {
     pub state: LoroValue,

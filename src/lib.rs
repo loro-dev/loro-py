@@ -1,4 +1,5 @@
 use pyo3::prelude::*;
+use pyo3_stub_gen::define_stub_info_gatherer;
 
 mod awareness;
 mod container;
@@ -22,3 +23,5 @@ fn loro(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     awareness::register_class(m)?;
     Ok(())
 }
+
+define_stub_info_gatherer!(stub_info);

@@ -1,5 +1,6 @@
 use loro::{Counter, PeerID};
 use pyo3::{exceptions::PyValueError, prelude::*, BoundObject};
+use pyo3_stub_gen::derive::*;
 use std::fmt::Display;
 
 use crate::{
@@ -16,6 +17,7 @@ pub fn register_class(m: &Bound<'_, PyModule>) -> PyResult<()> {
     Ok(())
 }
 
+#[gen_stub_pyclass]
 #[pyclass(eq, str, get_all, set_all)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ID {
@@ -29,6 +31,7 @@ impl Display for ID {
     }
 }
 
+#[gen_stub_pymethods]
 #[pymethods]
 impl ID {
     #[new]
@@ -37,6 +40,7 @@ impl ID {
     }
 }
 
+#[gen_stub_pyclass_enum]
 #[pyclass(eq, hash, str)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ContainerType {
@@ -55,6 +59,7 @@ impl Display for ContainerType {
     }
 }
 
+#[gen_stub_pyclass_enum]
 #[pyclass(eq, str, hash)]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum ContainerID {
@@ -75,6 +80,7 @@ impl Display for ContainerID {
     }
 }
 
+#[gen_stub_pyclass_enum]
 #[pyclass(eq, str, eq_int)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Ordering {
@@ -99,6 +105,7 @@ impl From<std::cmp::Ordering> for Ordering {
     }
 }
 
+#[gen_stub_pyclass]
 #[pyclass(eq, str, get_all, set_all)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct TreeID {
@@ -112,6 +119,7 @@ impl Display for TreeID {
     }
 }
 
+#[gen_stub_pyclass_enum]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum TreeParentId {
     Node(TreeID),
@@ -151,6 +159,7 @@ impl<'py> IntoPyObject<'py> for TreeParentId {
     }
 }
 
+#[gen_stub_pyclass_enum]
 #[derive(Debug, Clone, FromPyObject, IntoPyObject)]
 pub enum ValueOrContainer {
     Value(LoroValue),
@@ -163,6 +172,7 @@ impl Display for ValueOrContainer {
     }
 }
 
+#[gen_stub_pyclass]
 #[derive(Debug, Clone)]
 pub struct LoroValue(pub(crate) loro::LoroValue);
 

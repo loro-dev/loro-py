@@ -4,6 +4,7 @@ use pyo3::{
     prelude::*,
     types::{PyBytes, PyDict, PyType},
 };
+use pyo3_stub_gen::derive::*;
 use std::{collections::HashSet, fmt::Display, ops::ControlFlow, sync::Arc};
 
 use crate::{
@@ -28,6 +29,7 @@ pub fn register_class(m: &Bound<'_, PyModule>) -> PyResult<()> {
     Ok(())
 }
 
+#[gen_stub_pyclass]
 #[pyclass(frozen)]
 pub struct LoroDoc {
     pub(crate) doc: LoroDocInner,
@@ -40,6 +42,7 @@ impl Default for LoroDoc {
     }
 }
 
+#[gen_stub_pymethods]
 #[pymethods]
 impl LoroDoc {
     /// Create a new `LoroDoc` instance.
@@ -96,10 +99,10 @@ impl LoroDoc {
     #[classmethod]
     pub fn decode_import_blob_meta(
         _cls: &Bound<'_, PyType>,
-        bytes: &[u8],
+        bytes: Vec<u8>,
         check_checksum: bool,
     ) -> PyLoroResult<ImportBlobMetadata> {
-        let meta = LoroDocInner::decode_import_blob_meta(bytes, check_checksum)?;
+        let meta = LoroDocInner::decode_import_blob_meta(&bytes, check_checksum)?;
         Ok(meta.into())
     }
 
@@ -341,8 +344,8 @@ impl LoroDoc {
     /// Import updates/snapshot exported by [`LoroDoc::export_snapshot`] or [`LoroDoc::export_from`].
     #[pyo3(name = "import_")]
     #[inline]
-    pub fn import(&self, bytes: &[u8]) -> PyLoroResult<ImportStatus> {
-        let status = self.doc.import(bytes)?;
+    pub fn import(&self, bytes: Vec<u8>) -> PyLoroResult<ImportStatus> {
+        let status = self.doc.import(&bytes)?;
         Ok(ImportStatus::from(status))
     }
 
@@ -351,8 +354,8 @@ impl LoroDoc {
     /// It marks the import with a custom `origin` string. It can be used to track the import source
     /// in the generated events.
     #[inline]
-    pub fn import_with(&self, bytes: &[u8], origin: &str) -> PyLoroResult<ImportStatus> {
-        let status = self.doc.import_with(bytes, origin)?;
+    pub fn import_with(&self, bytes: Vec<u8>, origin: &str) -> PyLoroResult<ImportStatus> {
+        let status = self.doc.import_with(&bytes, origin)?;
         Ok(ImportStatus::from(status))
     }
 
@@ -845,6 +848,7 @@ impl LoroDoc {
     }
 }
 
+#[gen_stub_pyclass]
 #[pyclass(frozen)]
 pub struct Configure(pub loro::Configure);
 
@@ -856,6 +860,7 @@ impl From<loro::Configure> for Configure {
 
 // TODO: Implement the methods for Configure
 
+#[gen_stub_pyclass]
 #[pyclass(get_all, set_all, str)]
 #[derive(Debug)]
 pub struct ImportStatus {
@@ -879,6 +884,7 @@ impl Display for ImportStatus {
     }
 }
 
+#[gen_stub_pyclass]
 #[pyclass(get_all, set_all, str)]
 #[derive(Debug)]
 pub struct CommitOptions {
@@ -905,12 +911,14 @@ impl Display for CommitOptions {
     }
 }
 
+#[gen_stub_pyclass]
 #[derive(Debug, Clone, PartialEq, Eq, IntoPyObject)]
 pub struct PosQueryResult {
     pub update: Option<Cursor>,
     pub current: AbsolutePosition,
 }
 
+#[gen_stub_pyclass]
 #[derive(Debug, Clone, PartialEq, Eq, IntoPyObject, FromPyObject)]
 pub struct AbsolutePosition {
     pub pos: usize,
@@ -918,6 +926,7 @@ pub struct AbsolutePosition {
     pub side: Side,
 }
 
+#[gen_stub_pyclass_enum]
 pub enum ExportMode {
     Snapshot,
     Updates { from: VersionVector },
@@ -997,6 +1006,7 @@ impl<'py> FromPyObject<'py> for ExportMode {
 
 /// This struct supports reverse repr: [CounterSpan]'s from can be less than to. But we should use it conservatively.
 /// We need this because it'll make merging deletions easier.
+#[gen_stub_pyclass]
 #[derive(Clone, Copy, PartialEq, Eq, FromPyObject)]
 pub struct IdSpan {
     pub peer: PeerID,
@@ -1008,12 +1018,14 @@ pub struct IdSpan {
 ///
 /// But we should use it behavior conservatively.
 /// If it is not necessary to be reverse, it should not.
+#[gen_stub_pyclass]
 #[derive(Clone, Copy, PartialEq, Eq, FromPyObject, IntoPyObject)]
 pub struct CounterSpan {
     pub start: Counter,
     pub end: Counter,
 }
 
+#[gen_stub_pyclass]
 #[derive(Clone, IntoPyObject)]
 pub struct ChangeMeta {
     /// Lamport timestamp of the Change
@@ -1031,6 +1043,7 @@ pub struct ChangeMeta {
     pub len: usize,
 }
 
+#[gen_stub_pyclass]
 #[derive(Clone, IntoPyObject)]
 pub struct ImportBlobMetadata {
     /// The partial start version vector.
@@ -1052,6 +1065,7 @@ pub struct ImportBlobMetadata {
     pub mode: EncodedBlobMode,
 }
 
+#[gen_stub_pyclass_enum]
 #[pyclass(eq, eq_int)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum EncodedBlobMode {
@@ -1062,10 +1076,12 @@ pub enum EncodedBlobMode {
     Updates,
 }
 
+#[gen_stub_pyclass]
 #[pyclass(str)]
 #[derive(Debug, Clone, Default)]
 pub struct StyleConfigMap(loro::StyleConfigMap);
 
+#[gen_stub_pymethods]
 #[pymethods]
 impl StyleConfigMap {
     #[new]
@@ -1108,6 +1124,7 @@ impl Display for StyleConfigMap {
 /// - After: when inserting new text after this style, the new text should inherit this style.
 /// - Both: when inserting new text before or after this style, the new text should inherit this style.
 /// - None: when inserting new text before or after this style, the new text should **not** inherit this style.
+#[gen_stub_pyclass_enum]
 #[pyclass(eq, eq_int)]
 #[derive(Clone, Copy, Eq, PartialEq, Debug, Hash)]
 pub enum ExpandType {

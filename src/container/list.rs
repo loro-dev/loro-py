@@ -1,5 +1,6 @@
 use loro::LoroList as LoroListInner;
 use pyo3::prelude::*;
+use pyo3_stub_gen::derive::*;
 
 use crate::{
     err::PyLoroResult,
@@ -8,10 +9,12 @@ use crate::{
 
 use super::{Container, Cursor, Side};
 
+#[gen_stub_pyclass]
 #[pyclass(frozen)]
 #[derive(Debug, Clone, Default)]
 pub struct LoroList(pub LoroListInner);
 
+#[gen_stub_pymethods]
 #[pymethods]
 impl LoroList {
     /// Create a new container that is detached from the document.

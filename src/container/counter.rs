@@ -1,12 +1,14 @@
+use crate::{err::PyLoroResult, value::ContainerID};
 use loro::LoroCounter as LoroCounterInner;
 use pyo3::prelude::*;
+use pyo3_stub_gen::derive::*;
 
-use crate::{err::PyLoroResult, value::ContainerID};
-
+#[gen_stub_pyclass]
 #[pyclass(frozen)]
 #[derive(Debug, Clone, Default)]
 pub struct LoroCounter(pub LoroCounterInner);
 
+#[gen_stub_pymethods]
 #[pymethods]
 impl LoroCounter {
     /// Create a new Counter.

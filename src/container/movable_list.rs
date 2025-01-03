@@ -4,13 +4,16 @@ use crate::{
 };
 use loro::{LoroMovableList as LoroMovableListInner, PeerID};
 use pyo3::prelude::*;
+use pyo3_stub_gen::derive::*;
 
 use super::{Container, Cursor, Side};
 
+#[gen_stub_pyclass]
 #[pyclass(frozen)]
 #[derive(Debug, Clone, Default)]
 pub struct LoroMovableList(pub LoroMovableListInner);
 
+#[gen_stub_pymethods]
 #[pymethods]
 impl LoroMovableList {
     /// Create a new container that is detached from the document.

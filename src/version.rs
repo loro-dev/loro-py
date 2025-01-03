@@ -1,5 +1,6 @@
 use crate::{err::PyLoroResult, value::ID};
 use pyo3::{prelude::*, types::PyType};
+use pyo3_stub_gen::derive::*;
 use std::fmt::Display;
 
 pub fn register_class(m: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -9,6 +10,7 @@ pub fn register_class(m: &Bound<'_, PyModule>) -> PyResult<()> {
     Ok(())
 }
 
+#[gen_stub_pyclass]
 #[pyclass(str)]
 #[derive(Clone, Default)]
 pub struct Frontiers(loro::Frontiers);
@@ -19,6 +21,7 @@ impl Display for Frontiers {
     }
 }
 
+#[gen_stub_pymethods]
 #[pymethods]
 impl Frontiers {
     #[new]
@@ -43,8 +46,8 @@ impl Frontiers {
     }
 
     #[classmethod]
-    pub fn decode(_cls: &Bound<'_, PyType>, bytes: &[u8]) -> PyLoroResult<Self> {
-        let ans = Self(loro::Frontiers::decode(bytes)?);
+    pub fn decode(_cls: &Bound<'_, PyType>, bytes: Vec<u8>) -> PyLoroResult<Self> {
+        let ans = Self(loro::Frontiers::decode(&bytes)?);
         Ok(ans)
     }
 }
@@ -67,6 +70,7 @@ impl From<&Frontiers> for loro::Frontiers {
     }
 }
 
+#[gen_stub_pyclass]
 #[pyclass(str)]
 #[derive(Clone, Debug, PartialEq, Eq, Default)]
 pub struct VersionRange(loro::VersionRange);
@@ -89,6 +93,7 @@ impl From<loro::VersionRange> for VersionRange {
     }
 }
 
+#[gen_stub_pyclass]
 #[pyclass(str)]
 #[derive(Debug, Clone)]
 pub struct VersionVector(loro::VersionVector);

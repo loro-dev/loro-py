@@ -11,10 +11,12 @@ pub use counter::LoroCounter;
 pub use list::LoroList;
 pub use map::LoroMap;
 pub use movable_list::LoroMovableList;
+use pyo3_stub_gen_derive::*;
 pub use text::{Cursor, LoroText, Side, UpdateOptions};
 pub use tree::{LoroTree, TreeNode};
 pub use unknown::LoroUnknown;
 
+#[gen_stub_pyclass_enum]
 #[derive(Debug, Clone, FromPyObject, IntoPyObject)]
 pub enum Container {
     List(LoroList),

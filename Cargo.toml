@@ -5,8 +5,11 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]
-name = "loro"
-crate-type = ["cdylib"]
+name = "loro_py"
+crate-type = ["cdylib", "rlib"]
+
+[[bin]]
+name = "stub_gen"
 
 [dependencies]
 loro = { git = "https://github.com/loro-dev/loro.git", tag = "loro-crdt@1.2.5", features = [
@@ -20,3 +23,5 @@ loro-internal = { git = "https://github.com/loro-dev/loro.git", tag = "loro-crdt
 fxhash = "0.2.1"
 pyo3 = { version = "0.23.3", features = ["extension-module"] }
 serde_json = "1"
+pyo3-stub-gen = "0.6.2"
+pyo3-stub-gen-derive = "0.6.2"

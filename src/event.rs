@@ -1,6 +1,7 @@
 use crate::value::{ContainerID, LoroValue, TreeID, TreeParentId, ValueOrContainer};
 use pyo3::prelude::*;
 use pyo3::types::{PyDict, PyTuple};
+use pyo3_stub_gen::derive::*;
 use std::collections::HashMap;
 use std::fmt;
 use std::sync::Mutex;
@@ -47,6 +48,7 @@ impl fmt::Display for DiffEvent {
     }
 }
 
+#[gen_stub_pyclass_enum]
 /// The kind of the event trigger.
 #[pyclass(eq, eq_int)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -115,6 +117,7 @@ impl fmt::Display for ContainerDiff {
     }
 }
 
+#[gen_stub_pyclass_enum]
 #[derive(Debug, Clone, IntoPyObject, FromPyObject)]
 pub enum Index {
     Key(String),
@@ -175,6 +178,7 @@ impl fmt::Display for Diff {
     }
 }
 
+#[gen_stub_pyclass_enum]
 #[derive(Debug, Clone, IntoPyObject, FromPyObject)]
 pub enum TextDelta {
     Retain {
@@ -228,6 +232,7 @@ impl fmt::Display for TextDelta {
     }
 }
 
+#[gen_stub_pyclass_enum]
 #[pyclass]
 #[derive(Debug, Clone)]
 pub enum ListDiffItem {
@@ -277,6 +282,7 @@ impl fmt::Display for ListDiffItem {
     }
 }
 
+#[gen_stub_pyclass]
 #[pyclass(str, get_all, set_all)]
 #[derive(Debug, Clone)]
 pub struct MapDelta {
@@ -302,6 +308,7 @@ impl fmt::Display for MapDelta {
     }
 }
 
+#[gen_stub_pyclass]
 #[pyclass(str, get_all, set_all)]
 #[derive(Debug, Clone)]
 pub struct TreeDiff {
@@ -322,6 +329,7 @@ impl fmt::Display for TreeDiff {
     }
 }
 
+#[gen_stub_pyclass]
 #[pyclass(str, get_all, set_all)]
 #[derive(Debug, Clone)]
 pub struct TreeDiffItem {
@@ -339,6 +347,7 @@ impl fmt::Display for TreeDiffItem {
     }
 }
 
+#[gen_stub_pyclass_enum]
 #[pyclass(str, get_all, set_all)]
 #[derive(Debug, Clone)]
 pub enum TreeExternalDiff {
@@ -401,9 +410,11 @@ impl fmt::Display for TreeExternalDiff {
     }
 }
 
+#[gen_stub_pyclass]
 #[pyclass(frozen)]
 pub struct Subscription(pub(crate) Mutex<Option<loro::Subscription>>);
 
+#[gen_stub_pymethods]
 #[pymethods]
 impl Subscription {
     #[pyo3(signature = (*_args, **_kwargs))]
