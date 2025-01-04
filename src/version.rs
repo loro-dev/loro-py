@@ -1,5 +1,5 @@
 use crate::{err::PyLoroResult, value::ID};
-use pyo3::{prelude::*, types::PyType};
+use pyo3::{basic::CompareOp, exceptions::PyNotImplementedError, prelude::*, types::PyType};
 use std::fmt::Display;
 
 pub fn register_class(m: &Bound<'_, PyModule>) -> PyResult<()> {
@@ -89,9 +89,27 @@ impl From<loro::VersionRange> for VersionRange {
     }
 }
 
-#[pyclass(str)]
-#[derive(Debug, Clone)]
+#[pyclass]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VersionVector(loro::VersionVector);
+
+#[pymethods]
+impl VersionVector {
+    #[new]
+    pub fn new() -> Self {
+        Self::default()
+    }
+
+    fn __richcmp__(&self, other: PyRef<Self>, op: CompareOp) -> PyResult<bool> {
+        match op {
+            CompareOp::Eq => Ok(self.0 == other.0),
+            CompareOp::Ne => Ok(self.0 != other.0),
+            _ => Err(PyNotImplementedError::new_err(
+                "Only == and != comparisons are supported",
+            )),
+        }
+    }
+}
 
 impl Default for VersionVector {
     fn default() -> Self {
