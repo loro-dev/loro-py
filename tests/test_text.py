@@ -57,4 +57,9 @@ def test_wrapper():
     text.insert(0, 'Hello world!')
     wrapper.doc.get_map('fields').insert_container('text', text)
 
+    # this works because wrapper is stored as a variable
+    wrapper_2 = Wrapper.from_snapshot(wrapper.export())
+    wrapper_2.doc.get_map('fields').get_deep_value()
+
+    # this fails
     Wrapper.from_snapshot(wrapper.export()).doc.get_map('fields').get_deep_value()
