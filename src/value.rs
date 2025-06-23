@@ -9,6 +9,7 @@ use crate::{
 
 pub fn register_class(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<ID>()?;
+    m.add_class::<IdLp>()?;
     m.add_class::<ContainerType>()?;
     m.add_class::<ContainerID>()?;
     m.add_class::<Ordering>()?;
@@ -35,6 +36,19 @@ impl ID {
     #[new]
     pub fn new(peer: u64, counter: i32) -> Self {
         Self { peer, counter }
+    }
+}
+
+#[pyclass(eq, str, get_all, set_all)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct IdLp {
+    pub peer: u64,
+    pub lamport: i32,
+}
+
+impl Display for IdLp {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
     }
 }
 

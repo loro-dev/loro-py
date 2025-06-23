@@ -2661,32 +2661,6 @@ class FirstCommitFromPeerPayload:
     """
     peer: int
 
-class FractionalIndex:
-    r"""
-    FractionalIndex is a positional identifier for tree nodes.
-    """
-    inner: bytes
-    
-    def __new__(cls, bytes: bytes) -> FractionalIndex: ...
-    
-    @classmethod
-    def from_hex_string(cls, hex_str: str) -> FractionalIndex:
-        r"""
-        Create a FractionalIndex from a hex string.
-        """
-        ...
-    
-    def to_string(self) -> str:
-        r"""
-        Convert the FractionalIndex to a hex string.
-        """
-        ...
-    
-    def to_bytes(self) -> bytes:
-        r"""
-        Get the raw bytes of the FractionalIndex.
-        """
-        ...
 
 class IdLp:
     r"""
@@ -2696,32 +2670,3 @@ class IdLp:
     lamport: int
     
     def __new__(cls, peer: int, lamport: int) -> IdLp: ...
-
-class FrontiersOrID:
-    r"""
-    Union type for Frontiers or ID.
-    """
-    frontiers: typing.Optional[Frontiers]
-    id: typing.Optional[ID]
-    
-    def __new__(cls, frontiers: typing.Optional[Frontiers] = None, id: typing.Optional[ID] = None) -> FrontiersOrID: ...
-    
-    def is_frontiers(self) -> bool:
-        r"""
-        Check if this is a Frontiers variant.
-        """
-        ...
-    
-    def is_id(self) -> bool:
-        r"""
-        Check if this is an ID variant.
-        """
-        ...
-
-class EphemeralEventTrigger(Enum):
-    r"""
-    Trigger type for ephemeral events.
-    """
-    Local = "Local"
-    Import = "Import"
-    Timeout = "Timeout"
