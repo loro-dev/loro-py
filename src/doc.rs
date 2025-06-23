@@ -11,7 +11,7 @@ use crate::{
         Cursor, LoroCounter, LoroList, LoroMap, LoroMovableList, LoroText, LoroTree, Side,
     },
     convert::pyobject_to_container_id,
-    err::PyLoroResult,
+    err::{PyLoroError, PyLoroResult},
     event::{DiffBatch, DiffEvent, Index, Subscription},
     value::{ContainerID, ContainerType, LoroValue, Ordering, ValueOrContainer, ID},
     version::{Frontiers, VersionRange, VersionVector, VersionVectorDiff},
@@ -1005,6 +1005,57 @@ impl LoroDoc {
             })
         }));
         subscription.into()
+    }
+
+    /// Set whether to hide empty root containers.
+    ///
+    /// # Example
+    /// ```
+    /// use loro::LoroDoc;
+    ///
+    /// let doc = LoroDoc::new();
+    /// let map = doc.get_map("map");
+    /// dbg!(doc.get_deep_value()); // {"map": {}}
+    /// doc.set_hide_empty_root_containers(true);
+    /// dbg!(doc.get_deep_value()); // {}
+    /// ```
+    pub fn set_hide_empty_root_containers(&self, hide: bool) {
+        self.doc.set_hide_empty_root_containers(hide);
+    }
+
+    /// Delete all content from a root container and hide it from the document.
+    ///
+    /// When a root container is empty and hidden:
+    /// - It won't show up in `get_deep_value()` results
+    /// - It won't be included in document snapshots
+    ///
+    /// Only works on root containers (containers without parents).
+    pub fn delete_root_container(&self, cid: ContainerID) {
+        self.doc.delete_root_container(cid.into());
+    }
+
+    /// Redacts sensitive content in JSON updates within the specified version range.
+    ///
+    /// This function allows you to share document history while removing potentially sensitive content.
+    /// It preserves the document structure and collaboration capabilities while replacing content with
+    /// placeholders according to these redaction rules:
+    ///
+    /// - Preserves delete and move operations
+    /// - Replaces text insertion content with the Unicode replacement character
+    /// - Substitutes list and map insert values with null
+    /// - Maintains structure of child containers
+    /// - Replaces text mark values with null
+    /// - Preserves map keys and text annotation keys
+    pub fn redact_json_updates(
+        &self,
+        json: &str,
+        version_range: VersionRange,
+    ) -> PyLoroResult<String> {
+        let mut schema =
+            serde_json::from_str(json).map_err(|_e| PyLoroError::Error(_e.to_string()))?;
+        loro::json::redact(&mut schema, version_range.into())
+            .map_err(|e| PyLoroError::Error(e.to_string()))?;
+        Ok(serde_json::to_string(&schema).unwrap())
     }
 }
 

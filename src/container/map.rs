@@ -1,9 +1,12 @@
+use std::sync::Arc;
+
 use loro::{ContainerTrait, LoroMap as LoroMapInner, PeerID};
 use pyo3::prelude::*;
 
 use crate::{
     doc::LoroDoc,
     err::PyLoroResult,
+    event::{DiffEvent, Subscription},
     value::{ContainerID, LoroValue, ValueOrContainer},
 };
 
@@ -143,5 +146,25 @@ impl LoroMap {
 
     pub fn doc(&self) -> Option<LoroDoc> {
         self.0.doc().map(|doc| doc.into())
+    }
+
+    /// Subscribe the events of a container.
+    ///
+    /// The callback will be invoked when the container is changed.
+    /// Returns a subscription that can be used to unsubscribe.
+    ///
+    /// The events will be emitted after a transaction is committed. A transaction is committed when:
+    ///
+    /// - `doc.commit()` is called.
+    /// - `doc.export(mode)` is called.
+    /// - `doc.import(data)` is called.
+    /// - `doc.checkout(version)` is called.
+    pub fn subscribe(&self, callback: PyObject) -> Option<Subscription> {
+        let subscription = self.0.subscribe(Arc::new(move |e| {
+            Python::with_gil(|py| {
+                callback.call1(py, (DiffEvent::from(e),)).unwrap();
+            });
+        }));
+        subscription.map(|s| s.into())
     }
 }

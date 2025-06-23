@@ -35,6 +35,16 @@ impl UndoManager {
         Ok(self.0.redo()?)
     }
 
+    /// How many times the undo manager can undo.
+    pub fn undo_count(&self) -> usize {
+        self.0.undo_count()
+    }
+
+    /// How many times the undo manager can redo.
+    pub fn redo_count(&self) -> usize {
+        self.0.redo_count()
+    }
+
     /// Record a new checkpoint.
     pub fn record_new_checkpoint(&mut self) -> PyLoroResult<()> {
         Ok(self.0.record_new_checkpoint()?)

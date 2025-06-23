@@ -134,7 +134,7 @@ impl EphemeralStore {
     }
 
     pub fn keys(&self) -> Vec<String> {
-        self.0.keys().map(|s| s.to_string()).collect()
+        self.0.keys()
     }
 
     pub fn subscribe_local_updates(&self, callback: PyObject) -> Subscription {

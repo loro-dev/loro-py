@@ -1,11 +1,11 @@
 use loro::{ContainerTrait, LoroText as LoroTextInner, PeerID};
-use pyo3::{exceptions::PyValueError, prelude::*};
-use std::fmt::Display;
+use pyo3::{exceptions::PyValueError, prelude::*, types::PyBytes};
+use std::{fmt::Display, sync::Arc};
 
 use crate::{
     doc::LoroDoc,
-    err::PyLoroResult,
-    event::TextDelta,
+    err::{PyLoroError, PyLoroResult},
+    event::{DiffEvent, Subscription, TextDelta},
     value::{ContainerID, LoroValue, ID},
 };
 
@@ -323,6 +323,26 @@ impl LoroText {
     pub fn doc(&self) -> Option<LoroDoc> {
         self.0.doc().map(|doc| doc.into())
     }
+
+    /// Subscribe the events of a container.
+    ///
+    /// The callback will be invoked when the container is changed.
+    /// Returns a subscription that can be used to unsubscribe.
+    ///
+    /// The events will be emitted after a transaction is committed. A transaction is committed when:
+    ///
+    /// - `doc.commit()` is called.
+    /// - `doc.export(mode)` is called.
+    /// - `doc.import(data)` is called.
+    /// - `doc.checkout(version)` is called.
+    pub fn subscribe(&self, callback: PyObject) -> Option<Subscription> {
+        let subscription = self.0.subscribe(Arc::new(move |e| {
+            Python::with_gil(|py| {
+                callback.call1(py, (DiffEvent::from(e),)).unwrap();
+            });
+        }));
+        subscription.map(|s| s.into())
+    }
 }
 
 #[pyclass(eq, eq_int)]
@@ -365,5 +385,16 @@ impl Cursor {
     #[getter]
     pub fn container(&self) -> ContainerID {
         self.0.container.clone().into()
+    }
+
+    pub fn encode(&self) -> Vec<u8> {
+        self.0.encode()
+    }
+
+    #[staticmethod]
+    pub fn decode(bytes: Bound<'_, PyBytes>) -> PyLoroResult<Self> {
+        let cursor = loro::cursor::Cursor::decode(bytes.as_bytes())
+            .map_err(|e| PyLoroError::Error(e.to_string()))?;
+        Ok(Self(cursor))
     }
 }

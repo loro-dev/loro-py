@@ -7,6 +7,7 @@ pub enum PyLoroError {
     LoroEncodeError(LoroEncodeError),
     ChangeTravelError(ChangeTravelError),
     PyError(PyErr),
+    Error(String),
 }
 
 pub type PyLoroResult<T> = Result<T, PyLoroError>;
@@ -43,6 +44,7 @@ impl From<PyLoroError> for PyErr {
             PyLoroError::LoroEncodeError(e) => PyBaseException::new_err(e.to_string()),
             PyLoroError::ChangeTravelError(e) => PyBaseException::new_err(e.to_string()),
             PyLoroError::PyError(e) => e,
+            PyLoroError::Error(e) => PyBaseException::new_err(e),
         }
     }
 }
