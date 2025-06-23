@@ -122,6 +122,19 @@ class Cursor:
     id: typing.Optional[ID]
     side: Side
     container: ContainerID
+    
+    def encode(self) -> bytes:
+        r"""
+        Encode the cursor to bytes.
+        """
+        ...
+    
+    @classmethod
+    def decode(cls, bytes: bytes) -> Cursor:
+        r"""
+        Decode the cursor from bytes.
+        """
+        ...
 
 class DiffEvent:
     triggered_by: EventTriggerKind
@@ -184,6 +197,22 @@ class LoroCounter:
     def decrement(self, value: typing.Any) -> None:
         r"""
         Decrement the counter by the given value.
+        """
+        ...
+    
+    def subscribe(self, callback: typing.Callable[[DiffEvent], None]) -> typing.Optional[Subscription]:
+        r"""
+        Subscribe the events of a container.
+        
+        The callback will be invoked when the container is changed.
+        Returns a subscription that can be used to unsubscribe.
+        
+        The events will be emitted after a transaction is committed. A transaction is committed when:
+        
+        - `doc.commit()` is called.
+        - `doc.export(mode)` is called.
+        - `doc.import(data)` is called.
+        - `doc.checkout(version)` is called.
         """
         ...
 
@@ -830,6 +859,52 @@ class LoroDoc:
         You can get the timestamp from the [`Change`] type.
         """
         ...
+    
+    def set_hide_empty_root_containers(self, hide: bool) -> None:
+        r"""
+        Set whether to hide empty root containers.
+
+        # Example
+        ```
+        use loro::LoroDoc;
+
+        let doc = LoroDoc::new();
+        let map = doc.get_map("map");
+        dbg!(doc.get_deep_value()); // {"map": {}}
+        doc.set_hide_empty_root_containers(true);
+        dbg!(doc.get_deep_value()); // {}
+        ```
+        """
+        ...
+    
+    def delete_root_container(self, cid: ContainerID) -> None:
+        r"""
+        Delete all content from a root container and hide it from the document.
+
+        When a root container is empty and hidden:
+        - It won't show up in `get_deep_value()` results
+        - It won't be included in document snapshots
+
+        Only works on root containers (containers without parents).
+        """
+        ...
+    
+    def redact_json_updates(self, json: str, version_range: VersionRange) -> str:
+        r"""
+        Redacts sensitive content in JSON updates within the specified version range.
+
+        This function allows you to share document history while removing potentially sensitive content.
+        It preserves the document structure and collaboration capabilities while replacing content with
+        placeholders according to these redaction rules:
+
+        - Preserves delete and move operations
+        - Replaces text insertion content with the Unicode replacement character
+        - Substitutes list and map insert values with null
+        - Maintains structure of child containers
+        - Replaces text mark values with null
+        - Preserves map keys and text annotation keys
+        """
+        ...
 
     def set_next_commit_options(
         self,
@@ -1077,6 +1152,22 @@ class LoroList:
         Get the LoroDoc of the container.
         """
         ...
+    
+    def subscribe(self, callback: typing.Callable[[DiffEvent], None]) -> typing.Optional[Subscription]:
+        r"""
+        Subscribe the events of a container.
+        
+        The callback will be invoked when the container is changed.
+        Returns a subscription that can be used to unsubscribe.
+        
+        The events will be emitted after a transaction is committed. A transaction is committed when:
+        
+        - `doc.commit()` is called.
+        - `doc.export(mode)` is called.
+        - `doc.import(data)` is called.
+        - `doc.checkout(version)` is called.
+        """
+        ...
 
 class LoroMap:
     is_attached: bool
@@ -1182,6 +1273,22 @@ class LoroMap:
     def doc(self) -> typing.Optional[LoroDoc]:
         r"""
         Get the LoroDoc of the container.
+        """
+        ...
+    
+    def subscribe(self, callback: typing.Callable[[DiffEvent], None]) -> typing.Optional[Subscription]:
+        r"""
+        Subscribe the events of a container.
+        
+        The callback will be invoked when the container is changed.
+        Returns a subscription that can be used to unsubscribe.
+        
+        The events will be emitted after a transaction is committed. A transaction is committed when:
+        
+        - `doc.commit()` is called.
+        - `doc.export(mode)` is called.
+        - `doc.import(data)` is called.
+        - `doc.checkout(version)` is called.
         """
         ...
 
@@ -1384,6 +1491,22 @@ class LoroMovableList:
         Get the LoroDoc of the container.
         """
         ...
+    
+    def subscribe(self, callback: typing.Callable[[DiffEvent], None]) -> typing.Optional[Subscription]:
+        r"""
+        Subscribe the events of a container.
+        
+        The callback will be invoked when the container is changed.
+        Returns a subscription that can be used to unsubscribe.
+        
+        The events will be emitted after a transaction is committed. A transaction is committed when:
+        
+        - `doc.commit()` is called.
+        - `doc.export(mode)` is called.
+        - `doc.import(data)` is called.
+        - `doc.checkout(version)` is called.
+        """
+        ...
 
 class LoroText:
     is_attached: bool
@@ -1582,6 +1705,22 @@ class LoroText:
     def doc(self) -> typing.Optional[LoroDoc]:
         r"""
         Get the LoroDoc of the container.
+        """
+        ...
+    
+    def subscribe(self, callback: typing.Callable[[DiffEvent], None]) -> typing.Optional[Subscription]:
+        r"""
+        Subscribe the events of a container.
+        
+        The callback will be invoked when the container is changed.
+        Returns a subscription that can be used to unsubscribe.
+        
+        The events will be emitted after a transaction is committed. A transaction is committed when:
+        
+        - `doc.commit()` is called.
+        - `doc.export(mode)` is called.
+        - `doc.import(data)` is called.
+        - `doc.checkout(version)` is called.
         """
         ...
 
@@ -1883,6 +2022,22 @@ class LoroTree:
         Get the LoroDoc of the container.
         """
         ...
+    
+    def subscribe(self, callback: typing.Callable[[DiffEvent], None]) -> typing.Optional[Subscription]:
+        r"""
+        Subscribe the events of a container.
+        
+        The callback will be invoked when the container is changed.
+        Returns a subscription that can be used to unsubscribe.
+        
+        The events will be emitted after a transaction is committed. A transaction is committed when:
+        
+        - `doc.commit()` is called.
+        - `doc.export(mode)` is called.
+        - `doc.import(data)` is called.
+        - `doc.checkout(version)` is called.
+        """
+        ...
 
 class LoroUnknown:
     id: ContainerID
@@ -1890,6 +2045,22 @@ class LoroUnknown:
     def doc(self) -> typing.Optional[LoroDoc]:
         r"""
         Get the LoroDoc of the container.
+        """
+        ...
+    
+    def subscribe(self, callback: typing.Callable[[DiffEvent], None]) -> typing.Optional[Subscription]:
+        r"""
+        Subscribe the events of a container.
+        
+        The callback will be invoked when the container is changed.
+        Returns a subscription that can be used to unsubscribe.
+        
+        The events will be emitted after a transaction is committed. A transaction is committed when:
+        
+        - `doc.commit()` is called.
+        - `doc.export(mode)` is called.
+        - `doc.import(data)` is called.
+        - `doc.checkout(version)` is called.
         """
         ...
 
@@ -1980,6 +2151,18 @@ class UndoManager:
     def redo(self) -> bool:
         r"""
         Redo the last change made by the peer.
+        """
+        ...
+    
+    def undo_count(self) -> int:
+        r"""
+        How many times the undo manager can undo.
+        """
+        ...
+    
+    def redo_count(self) -> int:
+        r"""
+        How many times the undo manager can redo.
         """
         ...
 
@@ -2477,3 +2660,68 @@ class FirstCommitFromPeerPayload:
     The payload passed to the first commit from peer callback.
     """
     peer: int
+
+class FractionalIndex:
+    r"""
+    FractionalIndex is a positional identifier for tree nodes.
+    """
+    inner: bytes
+    
+    def __new__(cls, bytes: bytes) -> FractionalIndex: ...
+    
+    @classmethod
+    def from_hex_string(cls, hex_str: str) -> FractionalIndex:
+        r"""
+        Create a FractionalIndex from a hex string.
+        """
+        ...
+    
+    def to_string(self) -> str:
+        r"""
+        Convert the FractionalIndex to a hex string.
+        """
+        ...
+    
+    def to_bytes(self) -> bytes:
+        r"""
+        Get the raw bytes of the FractionalIndex.
+        """
+        ...
+
+class IdLp:
+    r"""
+    ID with Lamport timestamp.
+    """
+    peer: int
+    lamport: int
+    
+    def __new__(cls, peer: int, lamport: int) -> IdLp: ...
+
+class FrontiersOrID:
+    r"""
+    Union type for Frontiers or ID.
+    """
+    frontiers: typing.Optional[Frontiers]
+    id: typing.Optional[ID]
+    
+    def __new__(cls, frontiers: typing.Optional[Frontiers] = None, id: typing.Optional[ID] = None) -> FrontiersOrID: ...
+    
+    def is_frontiers(self) -> bool:
+        r"""
+        Check if this is a Frontiers variant.
+        """
+        ...
+    
+    def is_id(self) -> bool:
+        r"""
+        Check if this is an ID variant.
+        """
+        ...
+
+class EphemeralEventTrigger(Enum):
+    r"""
+    Trigger type for ephemeral events.
+    """
+    Local = "Local"
+    Import = "Import"
+    Timeout = "Timeout"
