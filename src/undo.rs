@@ -123,6 +123,26 @@ impl UndoManager {
     pub fn clear(&self) {
         self.0.clear();
     }
+
+    /// Will start a new group of changes, all subsequent changes will be merged
+    /// into a new item on the undo stack. If we receive remote changes, we determine
+    /// whether or not they are conflicting. If the remote changes are conflicting
+    /// we split the undo item and close the group. If there are no conflict
+    /// in changed container ids we continue the group merge.
+    pub fn group_start(&mut self) -> PyLoroResult<()> {
+        Ok(self.0.group_start()?)
+    }
+
+    /// Ends the current group, calling UndoManager::undo() after this will
+    /// undo all changes that occurred during the group.
+    pub fn group_end(&mut self) {
+        self.0.group_end()
+    }
+
+    /// Get the peer id of the undo manager
+    pub fn peer(&self) -> u64 {
+        self.0.peer()
+    }
 }
 
 #[pyclass(eq, eq_int)]

@@ -2230,6 +2230,29 @@ class UndoManager:
         """
         ...
 
+    def group_start(self) -> None:
+        r"""
+        Will start a new group of changes, all subsequent changes will be merged
+        into a new item on the undo stack. If we receive remote changes, we determine
+        whether or not they are conflicting. If the remote changes are conflicting
+        we split the undo item and close the group. If there are no conflict
+        in changed container ids we continue the group merge.
+        """
+        ...
+
+    def group_end(self) -> None:
+        r"""
+        Ends the current group, calling UndoManager::undo() after this will
+        undo all changes that occurred during the group.
+        """
+        ...
+
+    def peer(self) -> int:
+        r"""
+        Get the peer id of the undo manager
+        """
+        ...
+
 class VersionVector:
     def __new__(
         cls,

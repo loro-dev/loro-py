@@ -10,7 +10,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 # loro = { path = "../loro/crates/loro", features = ["counter", "jsonpath"] }
-loro = { version = "1.5.9", features = ["counter", "jsonpath"] }
+loro = { version = "1.5.10", features = ["counter", "jsonpath"] }
 fxhash = "0.2.1"
 pyo3 = { version = "0.24.1" }
 serde_json = "1"
