@@ -25,12 +25,12 @@ impl Awareness {
         Self(loro::awareness::Awareness::new(peer, timeout))
     }
 
-    pub fn encode(&self, peers: Vec<PeerID>) -> Cow<[u8]> {
+    pub fn encode(&self, peers: Vec<PeerID>) -> Cow<'_, [u8]> {
         let ans: Vec<u8> = self.0.encode(&peers);
         Cow::Owned(ans)
     }
 
-    pub fn encode_all(&self) -> Cow<[u8]> {
+    pub fn encode_all(&self) -> Cow<'_, [u8]> {
         let ans: Vec<u8> = self.0.encode_all();
         Cow::Owned(ans)
     }

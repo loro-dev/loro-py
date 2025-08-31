@@ -802,7 +802,7 @@ impl LoroDoc {
     }
 
     /// Export the document in the given mode.
-    pub fn export(&self, mode: ExportMode) -> PyLoroResult<Cow<[u8]>> {
+    pub fn export(&self, mode: ExportMode) -> PyLoroResult<Cow<'_, [u8]>> {
         let ans = self.doc.export(mode.into())?;
         Ok(Cow::Owned(ans))
     }

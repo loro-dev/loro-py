@@ -48,7 +48,7 @@ impl Frontiers {
         ))
     }
 
-    pub fn encode(&self) -> Cow<[u8]> {
+    pub fn encode(&self) -> Cow<'_, [u8]> {
         let ans: Vec<u8> = self.0.encode();
         Cow::Owned(ans)
     }
@@ -311,7 +311,7 @@ impl VersionVector {
     }
 
     #[inline(always)]
-    pub fn encode(&self) -> Cow<[u8]> {
+    pub fn encode(&self) -> Cow<'_, [u8]> {
         let ans: Vec<u8> = self.0.encode();
         Cow::Owned(ans)
     }

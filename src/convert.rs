@@ -125,7 +125,7 @@ pub fn pyobject_to_loro_value(obj: &Bound<'_, PyAny>) -> PyResult<loro::LoroValu
     Err(PyTypeError::new_err("Invalid LoroValue"))
 }
 
-pub fn loro_value_to_pyobject(py: Python, value: LoroValue) -> PyResult<Bound<'_, PyAny>> {
+pub fn loro_value_to_pyobject(py: Python<'_>, value: LoroValue) -> PyResult<Bound<'_, PyAny>> {
     match value.0 {
         loro::LoroValue::Null => Ok(py.None().into_pyobject(py)?.into_any().into_bound()),
         loro::LoroValue::Bool(b) => Ok(PyBool::new(py, b)
