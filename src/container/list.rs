@@ -98,8 +98,8 @@ impl LoroList {
     }
 
     /// Iterate over the elements of the list.
-    pub fn for_each(&self, f: PyObject) {
-        Python::with_gil(|py| {
+    pub fn for_each(&self, f: Py<PyAny>) {
+        Python::attach(|py| {
             self.0.for_each(&mut |v| {
                 f.call1(py, (ValueOrContainer::from(v),)).unwrap();
             });
@@ -227,9 +227,9 @@ impl LoroList {
     /// - `doc.export(mode)` is called.
     /// - `doc.import(data)` is called.
     /// - `doc.checkout(version)` is called.
-    pub fn subscribe(&self, callback: PyObject) -> Option<Subscription> {
+    pub fn subscribe(&self, callback: Py<PyAny>) -> Option<Subscription> {
         let subscription = self.0.subscribe(Arc::new(move |e| {
-            Python::with_gil(|py| {
+            Python::attach(|py| {
                 callback.call1(py, (DiffEvent::from(e),)).unwrap();
             });
         }));

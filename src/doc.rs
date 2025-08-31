@@ -659,11 +659,11 @@ impl LoroDoc {
     /// sub.unsubscribe();
     /// ```
     #[inline]
-    pub fn subscribe(&self, container_id: &ContainerID, callback: PyObject) -> Subscription {
+    pub fn subscribe(&self, container_id: &ContainerID, callback: Py<PyAny>) -> Subscription {
         let subscription = self.doc.subscribe(
             &container_id.into(),
             Arc::new(move |e| {
-                Python::with_gil(|py| {
+                Python::attach(|py| {
                     callback.call1(py, (DiffEvent::from(e),)).unwrap();
                 });
             }),
@@ -683,9 +683,9 @@ impl LoroDoc {
     /// - `doc.import(data)` is called.
     /// - `doc.checkout(version)` is called.
     #[inline]
-    pub fn subscribe_root(&self, callback: PyObject) -> Subscription {
+    pub fn subscribe_root(&self, callback: Py<PyAny>) -> Subscription {
         let subscription = self.doc.subscribe_root(Arc::new(move |e| {
-            Python::with_gil(|py| {
+            Python::attach(|py| {
                 callback.call1(py, (DiffEvent::from(e),)).unwrap();
             });
         }));
@@ -693,9 +693,9 @@ impl LoroDoc {
     }
 
     /// Subscribe the local update of the document.
-    pub fn subscribe_local_update(&self, callback: PyObject) -> Subscription {
+    pub fn subscribe_local_update(&self, callback: Py<PyAny>) -> Subscription {
         let subscription = self.doc.subscribe_local_update(Box::new(move |updates| {
-            Python::with_gil(|py| {
+            Python::attach(|py| {
                 let b = callback.call1(py, (updates,)).unwrap();
                 b.extract::<bool>(py).unwrap()
             })
@@ -704,9 +704,9 @@ impl LoroDoc {
     }
 
     /// Subscribe the peer id change of the document.
-    pub fn subscribe_peer_id_change(&self, callback: PyObject) -> Subscription {
+    pub fn subscribe_peer_id_change(&self, callback: Py<PyAny>) -> Subscription {
         let subscription = self.doc.subscribe_peer_id_change(Box::new(move |id| {
-            Python::with_gil(|py| {
+            Python::attach(|py| {
                 let b = callback.call1(py, (ID::from(*id),)).unwrap();
                 b.extract::<bool>(py).unwrap()
             })
@@ -879,11 +879,11 @@ impl LoroDoc {
     ///
     /// * `ids` - The IDs of the Change to start the traversal from.
     /// * `cb` - A callback function that is called for each ancestor. It can return `True` to stop the traversal.
-    pub fn travel_change_ancestors(&self, ids: Vec<ID>, cb: PyObject) -> PyLoroResult<()> {
+    pub fn travel_change_ancestors(&self, ids: Vec<ID>, cb: Py<PyAny>) -> PyLoroResult<()> {
         self.doc.travel_change_ancestors(
             &ids.into_iter().map(|id| id.into()).collect::<Vec<_>>(),
             &mut |meta| {
-                let b = Python::with_gil(|py| {
+                let b = Python::attach(|py| {
                     cb.call1(py, (ChangeMeta::from(meta),))
                         .unwrap()
                         .extract::<bool>(py)
@@ -970,11 +970,11 @@ impl LoroDoc {
     ///
     /// This is useful for managing the relationship between `PeerID` and user information.
     /// For example, you could store user names in a `LoroMap` using `PeerID` as the key and the `UserID` as the value.
-    pub fn subscribe_first_commit_from_peer(&self, callback: PyObject) -> Subscription {
+    pub fn subscribe_first_commit_from_peer(&self, callback: Py<PyAny>) -> Subscription {
         let subscription = self
             .doc
             .subscribe_first_commit_from_peer(Box::new(move |payload| {
-                Python::with_gil(|py| {
+                Python::attach(|py| {
                     let b = callback
                         .call1(py, (FirstCommitFromPeerPayload { peer: payload.peer },))
                         .unwrap();
@@ -988,9 +988,9 @@ impl LoroDoc {
     ///
     /// The callback will be called when the changes are committed but not yet applied to the OpLog.
     /// You can modify the commit message and timestamp in the callback by [`ChangeModifier`].
-    pub fn subscribe_pre_commit(&self, callback: PyObject) -> Subscription {
+    pub fn subscribe_pre_commit(&self, callback: Py<PyAny>) -> Subscription {
         let subscription = self.doc.subscribe_pre_commit(Box::new(move |payload| {
-            Python::with_gil(|py| {
+            Python::attach(|py| {
                 let b = callback
                     .call1(
                         py,

@@ -335,9 +335,9 @@ impl LoroText {
     /// - `doc.export(mode)` is called.
     /// - `doc.import(data)` is called.
     /// - `doc.checkout(version)` is called.
-    pub fn subscribe(&self, callback: PyObject) -> Option<Subscription> {
+    pub fn subscribe(&self, callback: Py<PyAny>) -> Option<Subscription> {
         let subscription = self.0.subscribe(Arc::new(move |e| {
-            Python::with_gil(|py| {
+            Python::attach(|py| {
                 callback.call1(py, (DiffEvent::from(e),)).unwrap();
             });
         }));

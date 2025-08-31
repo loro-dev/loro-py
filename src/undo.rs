@@ -78,10 +78,10 @@ impl UndoManager {
 
     /// Set the listener for push events.
     /// The listener will be called when a new undo/redo item is pushed into the stack.
-    pub fn set_on_push(&mut self, on_push: PyObject) {
+    pub fn set_on_push(&mut self, on_push: Py<PyAny>) {
         self.0
             .set_on_push(Some(Box::new(move |undo_or_redo, span, event| {
-                Python::with_gil(|py| {
+                Python::attach(|py| {
                     let meta = on_push
                         .call1(
                             py,
@@ -101,10 +101,10 @@ impl UndoManager {
 
     /// Set the listener for pop events.
     /// The listener will be called when an undo/redo item is popped from the stack.
-    pub fn set_on_pop(&mut self, on_pop: PyObject) {
+    pub fn set_on_pop(&mut self, on_pop: Py<PyAny>) {
         self.0
             .set_on_pop(Some(Box::new(move |undo_or_redo, span, meta| {
-                Python::with_gil(|py| {
+                Python::attach(|py| {
                     on_pop
                         .call1(
                             py,

@@ -1,10 +1,10 @@
 #![allow(deprecated)]
 use std::{borrow::Cow, collections::HashMap};
 
-use loro::{awareness::EphemeralEventTrigger, PeerID};
+use loro::{awareness::EphemeralEventTrigger, LoroError, PeerID};
 use pyo3::{prelude::*, types::PyBytes};
 
-use crate::{event::Subscription, value::LoroValue};
+use crate::{err::PyLoroResult, event::Subscription, value::LoroValue};
 
 pub fn register_class(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<Awareness>()?;
@@ -105,8 +105,11 @@ impl EphemeralStore {
         self.0.encode_all()
     }
 
-    pub fn apply(&mut self, data: &[u8]) {
-        self.0.apply(data);
+    pub fn apply(&mut self, data: &[u8]) -> PyLoroResult<()> {
+        self.0
+            .apply(data)
+            .map_err(|e| LoroError::DecodeError(e.into()))?;
+        Ok(())
     }
 
     pub fn set(&mut self, key: &str, value: LoroValue) {

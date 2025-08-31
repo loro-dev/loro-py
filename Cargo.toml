@@ -1,6 +1,6 @@
 [package]
 name = "loro_py"
-version = "1.5.4"
+version = "1.6.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -10,7 +10,7 @@ crate-type = ["cdylib"]
 
 [dependencies]
 # loro = { path = "../loro/crates/loro", features = ["counter", "jsonpath"] }
-loro = { version = "1.5.11", features = ["counter", "jsonpath"] }
+loro = { version = "1.6.0", features = ["counter", "jsonpath"] }
 fxhash = "0.2.1"
-pyo3 = { version = "0.25.1" }
+pyo3 = { version = "0.26.0" }
 serde_json = "1"

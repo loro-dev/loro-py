@@ -28,13 +28,13 @@ impl LoroCounter {
     }
 
     /// Increment the counter by the given value.
-    pub fn increment(&self, py: Python, value: PyObject) -> PyLoroResult<()> {
+    pub fn increment(&self, py: Python, value: Py<PyAny>) -> PyLoroResult<()> {
         self.0.increment(value.extract::<f64>(py)?)?;
         Ok(())
     }
 
     /// Decrement the counter by the given value.
-    pub fn decrement(&self, py: Python, value: PyObject) -> PyLoroResult<()> {
+    pub fn decrement(&self, py: Python, value: Py<PyAny>) -> PyLoroResult<()> {
         self.0.decrement(value.extract::<f64>(py)?)?;
         Ok(())
     }
@@ -61,9 +61,9 @@ impl LoroCounter {
     /// - `doc.export(mode)` is called.
     /// - `doc.import(data)` is called.
     /// - `doc.checkout(version)` is called.
-    pub fn subscribe(&self, callback: PyObject) -> Option<Subscription> {
+    pub fn subscribe(&self, callback: Py<PyAny>) -> Option<Subscription> {
         let subscription = self.0.subscribe(Arc::new(move |e| {
-            Python::with_gil(|py| {
+            Python::attach(|py| {
                 callback.call1(py, (DiffEvent::from(e),)).unwrap();
             });
         }));
