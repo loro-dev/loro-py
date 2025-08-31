@@ -1,7 +1,4 @@
-from loro import LoroDoc, ExportMode, VersionVector, LORO_VERSION
-
-def test_version():
-    assert LORO_VERSION == "1.4.2"
+from loro import LoroDoc, ExportMode, VersionVector
 
 def test_basic():
     doc = LoroDoc()
