@@ -17,7 +17,7 @@ pub fn register_class(m: &Bound<'_, PyModule>) -> PyResult<()> {
     Ok(())
 }
 
-#[pyclass(frozen)]
+#[pyclass(frozen, mapping)]
 #[derive(Debug, Clone, Default)]
 pub struct LoroMap(pub LoroMapInner);
 
@@ -63,6 +63,30 @@ impl LoroMap {
     /// Get the length of the map.
     pub fn __len__(&self) -> usize {
         self.0.len()
+    }
+
+    pub fn __contains__(&self, key: &str) -> bool {
+        match self.0.get(key) {
+            Some(_) => true,
+            None => false
+        }
+    }
+
+    pub fn __getitem__(&self, key: &str) -> Option<ValueOrContainer> {
+        self.get(key)
+    }
+
+    pub fn __setitem__(&self, key: &str, value: LoroValue) -> PyLoroResult<()> {
+        self.insert(key, value)
+    }
+
+    pub fn __delitem__(&self, key: &str) -> PyLoroResult<()> {
+        self.0.delete(key)?;
+        Ok(())
+    }
+
+    pub fn __iter__(&self) -> Vec<String> {
+        self.0.keys().map(|k| k.to_string()).collect()
     }
 
     /// Get the ID of the map.

@@ -10,3 +10,5 @@ def test_map():
     assert doc.get_deep_value() == {
         "map": {"key": "value", "key2": ["value2"]},
     }
+    map["key2"] = "value2"
+    assert map["key2"].value == "value2"

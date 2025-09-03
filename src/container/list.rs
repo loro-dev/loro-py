@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use loro::{ContainerTrait, LoroList as LoroListInner};
 use pyo3::prelude::*;
+use pyo3::{BoundObject, types::PySlice, exceptions::PyIndexError};
 
 use crate::{
     doc::LoroDoc,
@@ -12,7 +13,13 @@ use crate::{
 
 use super::{Container, Cursor, Side};
 
-#[pyclass(frozen)]
+#[derive(FromPyObject)]
+enum SliceOrInt<'py> {
+    Slice(Bound<'py, PySlice>),
+    Int(usize),
+}
+
+#[pyclass(frozen, sequence)]
 #[derive(Debug, Clone, Default)]
 pub struct LoroList(pub LoroListInner);
 
@@ -104,6 +111,34 @@ impl LoroList {
                 f.call1(py, (ValueOrContainer::from(v),)).unwrap();
             });
         })
+    }
+
+    pub fn __getitem__<'py>(&self, py: Python<'py>, index: SliceOrInt<'py>) -> PyResult<Bound<'py, PyAny>> {
+        match index {
+            SliceOrInt::Slice(slice) => {
+                let indices = slice.indices(self.0.len() as isize)?;
+                let mut i = indices.start;
+                let mut list: Vec<ValueOrContainer> = Vec::with_capacity(indices.slicelength);
+
+                for _ in 0..indices.slicelength {
+                    list.push(self.0.get(i as usize).ok_or(PyIndexError::new_err("index out of range"))?.into());
+                    i += indices.step;
+                }
+                list.into_pyobject(py)
+                },
+            SliceOrInt::Int(idx) => {
+                let value: ValueOrContainer = self.0.get(usize::try_from(idx)?).ok_or(PyIndexError::new_err("index out of range"))?.into();
+                Ok(value.into_pyobject(py)?.into_any().into_bound())
+            }
+        }
+    }
+
+    pub fn __setitem__(&self, index: usize, v: LoroValue) -> PyLoroResult<()> {
+        self.insert(index, v)
+    }
+
+    pub fn __delitem__(&self, index: usize) -> PyLoroResult<()> {
+        self.delete(index, 1)
     }
 
     /// Get the length of the list.
