@@ -43,6 +43,10 @@ impl LoroTree {
         self.0.is_attached()
     }
 
+    pub fn __contains__(&self, target: TreeID) -> bool {
+        self.contains(target)
+    }
+
     /// Create a new tree node and return the [`TreeID`].
     ///
     /// If the `parent` is `None`, the created node is the root of a tree.

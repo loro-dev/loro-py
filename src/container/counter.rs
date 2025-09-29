@@ -7,7 +7,19 @@ use crate::{
     value::ContainerID,
 };
 use loro::{ContainerTrait, LoroCounter as LoroCounterInner};
-use pyo3::prelude::*;
+use pyo3::{exceptions::PyTypeError, prelude::*, Bound, PyRef};
+
+impl LoroCounter {
+    fn coerce_to_f64(other: &Bound<'_, PyAny>) -> PyLoroResult<f64> {
+        if let Ok(value) = other.extract::<f64>() {
+            Ok(value)
+        } else if let Ok(counter) = other.extract::<PyRef<LoroCounter>>() {
+            Ok(counter.get_value())
+        } else {
+            Err(PyTypeError::new_err("expected a number or LoroCounter").into())
+        }
+    }
+}
 
 #[pyclass(frozen)]
 #[derive(Debug, Clone, Default)]
@@ -44,6 +56,48 @@ impl LoroCounter {
     #[pyo3(name = "value")]
     pub fn get_value(&self) -> f64 {
         self.0.get_value()
+    }
+
+    pub fn __float__(&self) -> f64 {
+        self.0.get_value()
+    }
+
+    pub fn __int__(&self) -> PyLoroResult<i64> {
+        let value = self.0.get_value();
+        if !value.is_finite() {
+            return Err(PyTypeError::new_err("cannot convert non-finite counter to int").into());
+        }
+        if value < i64::MIN as f64 || value > i64::MAX as f64 {
+            return Err(PyTypeError::new_err("counter value out of range for int").into());
+        }
+        Ok(value.trunc() as i64)
+    }
+
+    pub fn __add__(&self, other: Bound<'_, PyAny>) -> PyLoroResult<f64> {
+        let delta = Self::coerce_to_f64(&other)?;
+        Ok(self.0.get_value() + delta)
+    }
+
+    pub fn __radd__(&self, other: Bound<'_, PyAny>) -> PyLoroResult<f64> {
+        self.__add__(other)
+    }
+
+    pub fn __sub__(&self, other: Bound<'_, PyAny>) -> PyLoroResult<f64> {
+        let delta = Self::coerce_to_f64(&other)?;
+        Ok(self.0.get_value() - delta)
+    }
+
+    pub fn __rsub__(&self, other: Bound<'_, PyAny>) -> PyLoroResult<f64> {
+        let delta = Self::coerce_to_f64(&other)?;
+        Ok(delta - self.0.get_value())
+    }
+
+    pub fn __neg__(&self) -> f64 {
+        -self.0.get_value()
+    }
+
+    pub fn __abs__(&self) -> f64 {
+        self.0.get_value().abs()
     }
 
     pub fn doc(&self) -> Option<LoroDoc> {

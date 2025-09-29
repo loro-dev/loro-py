@@ -1,17 +1,22 @@
 use std::sync::Arc;
 
 use crate::{
+    container::utils::{py_any_to_loro_values, slice_indices_positions, SliceOrInt},
     doc::LoroDoc,
-    err::PyLoroResult,
+    err::{PyLoroError, PyLoroResult},
     event::{DiffEvent, Subscription},
     value::{ContainerID, LoroValue, ValueOrContainer},
 };
 use loro::{ContainerTrait, LoroMovableList as LoroMovableListInner, PeerID};
 use pyo3::prelude::*;
+use pyo3::{
+    exceptions::{PyIndexError, PyValueError},
+    BoundObject,
+};
 
 use super::{Container, Cursor, Side};
 
-#[pyclass(frozen)]
+#[pyclass(frozen, sequence)]
 #[derive(Debug, Clone, Default)]
 pub struct LoroMovableList(pub LoroMovableListInner);
 
@@ -61,6 +66,113 @@ impl LoroMovableList {
     /// Get the length of the list.
     pub fn __len__(&self) -> usize {
         self.0.len()
+    }
+
+    pub fn __getitem__<'py>(
+        &self,
+        py: Python<'py>,
+        index: SliceOrInt<'py>,
+    ) -> PyResult<Bound<'py, PyAny>> {
+        match index {
+            SliceOrInt::Slice(slice) => {
+                let indices = slice.indices(self.0.len() as isize)?;
+                let mut i = indices.start;
+                let mut list: Vec<ValueOrContainer> = Vec::with_capacity(indices.slicelength);
+
+                for _ in 0..indices.slicelength {
+                    list.push(
+                        self.0
+                            .get(i as usize)
+                            .ok_or(PyIndexError::new_err("index out of range"))?
+                            .into(),
+                    );
+                    i += indices.step;
+                }
+                list.into_pyobject(py)
+            }
+            SliceOrInt::Int(idx) => {
+                let value: ValueOrContainer = self
+                    .0
+                    .get(usize::try_from(idx)?)
+                    .ok_or(PyIndexError::new_err("index out of range"))?
+                    .into();
+                Ok(value.into_pyobject(py)?.into_any().into_bound())
+            }
+        }
+    }
+
+    pub fn __setitem__<'py>(
+        &self,
+        index: SliceOrInt<'py>,
+        value: Bound<'py, PyAny>,
+    ) -> PyLoroResult<()> {
+        match index {
+            SliceOrInt::Int(idx) => {
+                let extracted: LoroValue = value.extract().map_err(PyLoroError::from)?;
+                self.0.set(idx, extracted.0).map_err(PyLoroError::from)?;
+                Ok(())
+            }
+            SliceOrInt::Slice(slice) => {
+                let len = self.__len__() as isize;
+                let indices = slice.indices(len).map_err(PyLoroError::from)?;
+
+                let values = py_any_to_loro_values(&value).map_err(PyLoroError::from)?;
+
+                if indices.step == 1 {
+                    self.0
+                        .delete(indices.start as usize, indices.slicelength)
+                        .map_err(PyLoroError::from)?;
+
+                    let mut pos = indices.start as usize;
+                    for v in values {
+                        self.0.insert(pos, v).map_err(PyLoroError::from)?;
+                        pos += 1;
+                    }
+                    Ok(())
+                } else {
+                    if values.len() != indices.slicelength {
+                        return Err(PyValueError::new_err(format!(
+                            "attempt to assign sequence of size {} to extended slice of size {}",
+                            values.len(),
+                            indices.slicelength
+                        ))
+                        .into());
+                    }
+
+                    let mut current = indices.start;
+                    for v in values {
+                        self.0.set(current as usize, v).map_err(PyLoroError::from)?;
+                        current += indices.step;
+                    }
+                    Ok(())
+                }
+            }
+        }
+    }
+
+    pub fn __delitem__<'py>(&self, index: SliceOrInt<'py>) -> PyLoroResult<()> {
+        match index {
+            SliceOrInt::Int(idx) => self.delete(idx, 1),
+            SliceOrInt::Slice(slice) => {
+                let len = self.__len__() as isize;
+                let indices = slice.indices(len).map_err(PyLoroError::from)?;
+
+                if indices.slicelength == 0 {
+                    return Ok(());
+                }
+
+                if indices.step == 1 {
+                    self.delete(indices.start as usize, indices.slicelength)
+                } else {
+                    let mut positions = slice_indices_positions(&indices);
+                    positions.sort_unstable();
+                    for pos in positions.into_iter().rev() {
+                        self.delete(pos, 1)?;
+                    }
+                    Ok(())
+                }
+            }
+        }
     }
 
     /// Whether the list is empty.

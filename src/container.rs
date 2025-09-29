@@ -7,6 +7,7 @@ mod movable_list;
 mod text;
 mod tree;
 mod unknown;
+pub mod utils;
 pub use counter::LoroCounter;
 pub use list::LoroList;
 pub use map::LoroMap;

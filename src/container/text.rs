@@ -1,5 +1,10 @@
 use loro::{ContainerTrait, LoroText as LoroTextInner, PeerID};
-use pyo3::{exceptions::PyValueError, prelude::*, types::PyBytes};
+use pyo3::{
+    exceptions::{PyIndexError, PyTypeError, PyValueError},
+    prelude::*,
+    types::{PyBytes, PySlice, PyString},
+    Bound, PyErr, PyRef,
+};
 use std::{fmt::Display, sync::Arc};
 
 use crate::{
@@ -38,6 +43,14 @@ impl LoroText {
     #[getter]
     pub fn is_attached(&self) -> bool {
         self.0.is_attached()
+    }
+
+    pub fn __str__(&self) -> String {
+        self.0.to_string()
+    }
+
+    pub fn __repr__(&self) -> String {
+        format!("LoroText({:?})", self.0.to_string())
     }
 
     /// Get the [ContainerID]  of the text container.
@@ -102,6 +115,77 @@ impl LoroText {
     /// Whether the text container is empty.
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
+    }
+
+    pub fn __len__(&self) -> usize {
+        self.len_unicode()
+    }
+
+    pub fn __getitem__<'py>(
+        &self,
+        py: Python<'py>,
+        key: Bound<'py, PyAny>,
+    ) -> PyResult<Bound<'py, PyAny>> {
+        if let Ok(index) = key.extract::<isize>() {
+            let len = self.len_unicode() as isize;
+            let mut idx = index;
+            if idx < 0 {
+                idx += len;
+            }
+            if idx < 0 || idx >= len {
+                return Err(PyIndexError::new_err("string index out of range"));
+            }
+            let ch = self.char_at(idx as usize).map_err(PyErr::from)?;
+            let mut buf = [0u8; 4];
+            let as_str = ch.encode_utf8(&mut buf);
+            Ok(PyString::new(py, as_str).into_any())
+        } else if let Ok(slice) = key.downcast::<PySlice>() {
+            let text = self.0.to_string();
+            let py_str = PyString::new(py, &text);
+            py_str.get_item(slice)
+        } else {
+            Err(PyTypeError::new_err(
+                "text indices must be integers or slices",
+            ))
+        }
+    }
+
+    pub fn __contains__(&self, item: Bound<'_, PyAny>) -> PyResult<bool> {
+        let text = self.0.to_string();
+        if let Ok(substr) = item.extract::<&str>() {
+            Ok(text.contains(substr))
+        } else if let Ok(other) = item.extract::<PyRef<LoroText>>() {
+            Ok(text.contains(&other.0.to_string()))
+        } else {
+            Ok(false)
+        }
+    }
+
+    pub fn __add__(&self, other: Bound<'_, PyAny>) -> PyResult<String> {
+        let mut result = self.0.to_string();
+        if let Ok(substr) = other.extract::<&str>() {
+            result.push_str(substr);
+            Ok(result)
+        } else if let Ok(other_text) = other.extract::<PyRef<LoroText>>() {
+            result.push_str(&other_text.0.to_string());
+            Ok(result)
+        } else {
+            Err(PyTypeError::new_err("can only concatenate str or LoroText"))
+        }
+    }
+
+    pub fn __radd__(&self, other: Bound<'_, PyAny>) -> PyResult<String> {
+        if let Ok(prefix) = other.extract::<&str>() {
+            Ok(format!("{}{}", prefix, self.0.to_string()))
+        } else if let Ok(other_text) = other.extract::<PyRef<LoroText>>() {
+            Ok(format!(
+                "{}{}",
+                other_text.0.to_string(),
+                self.0.to_string()
+            ))
+        } else {
+            Err(PyTypeError::new_err("can only concatenate str or LoroText"))
+        }
     }
 
     /// Get the length of the text container in UTF-8.
