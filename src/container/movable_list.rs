@@ -93,7 +93,7 @@ impl LoroMovableList {
             SliceOrInt::Int(idx) => {
                 let value: ValueOrContainer = self
                     .0
-                    .get(usize::try_from(idx)?)
+                    .get(idx)
                     .ok_or(PyIndexError::new_err("index out of range"))?
                     .into();
                 Ok(value.into_pyobject(py)?.into_any().into_bound())

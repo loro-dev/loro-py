@@ -106,9 +106,7 @@ impl EphemeralStore {
     }
 
     pub fn apply(&mut self, data: &[u8]) -> PyLoroResult<()> {
-        self.0
-            .apply(data)
-            .map_err(|e| LoroError::DecodeError(e.into()))?;
+        self.0.apply(data).map_err(LoroError::DecodeError)?;
         Ok(())
     }
 

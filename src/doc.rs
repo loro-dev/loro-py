@@ -8,7 +8,8 @@ use std::{borrow::Cow, collections::HashSet, fmt::Display, ops::ControlFlow, syn
 
 use crate::{
     container::{
-        Cursor, LoroCounter, LoroList, LoroMap, LoroMovableList, LoroText, LoroTree, Side,
+        Container, Cursor, LoroCounter, LoroList, LoroMap, LoroMovableList, LoroText, LoroTree,
+        Side,
     },
     convert::pyobject_to_container_id,
     err::{PyLoroError, PyLoroResult},
@@ -739,6 +740,11 @@ impl LoroDoc {
     #[inline]
     pub fn get_by_str_path(&self, path: &str) -> Option<ValueOrContainer> {
         self.doc.get_by_str_path(path).map(ValueOrContainer::from)
+    }
+
+    /// Get a container by its ContainerID.
+    pub fn get_container(&self, id: &ContainerID) -> Option<Container> {
+        self.doc.get_container(id.into()).map(|c| c.into())
     }
 
     /// Get the absolute position of the given cursor.

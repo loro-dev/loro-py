@@ -224,6 +224,14 @@ class LoroCounter:
         """
         ...
 
+    def convert_pos(
+        self, index: int, from_: "PositionType", to: "PositionType"
+    ) -> typing.Optional[int]:
+        r"""
+        Convert a position between coordinate systems.
+        """
+        ...
+
 class LoroDoc:
     config: Configure
     is_detached_editing_enabled: bool
@@ -669,6 +677,12 @@ class LoroDoc:
     def get_by_str_path(self, path: str) -> typing.Optional[ValueOrContainer]:
         r"""
         Get the handler by the string path.
+        """
+        ...
+
+    def get_container(self, id: ContainerID) -> typing.Optional[Container]:
+        r"""
+        Get a container by its ID.
         """
         ...
 
@@ -1588,6 +1602,12 @@ class LoroText:
         """
         ...
 
+    def insert_utf16(self, pos: int, s: str) -> None:
+        r"""
+        Insert a string at the given utf-16 position.
+        """
+        ...
+
     def delete(self, pos: int, len: int) -> None:
         r"""
         Delete a range of text at the given unicode position with unicode length.
@@ -1600,9 +1620,29 @@ class LoroText:
         """
         ...
 
+    def delete_utf16(self, pos: int, len: int) -> None:
+        r"""
+        Delete a range of text at the given utf-16 position with utf-16 length.
+        """
+        ...
+
     def slice(self, start_index: int, end_index: int) -> str:
         r"""
         Get a string slice at the given Unicode range
+        """
+        ...
+
+    def slice_utf16(self, start_index: int, end_index: int) -> str:
+        r"""
+        Get a string slice at the given UTF-16 range
+        """
+        ...
+
+    def slice_delta(
+        self, start_index: int, end_index: int, pos_type: "PositionType"
+    ) -> list[TextDelta]:
+        r"""
+        Get the rich-text delta within a range for the given position type.
         """
         ...
 
@@ -1615,6 +1655,12 @@ class LoroText:
     def splice(self, pos: int, len: int, s: str) -> str:
         r"""
         Delete specified character and insert string at the same position at given unicode position.
+        """
+        ...
+
+    def splice_utf16(self, pos: int, len: int, s: str) -> None:
+        r"""
+        Delete specified range and insert a string at the same UTF-16 position.
         """
         ...
 
@@ -1669,6 +1715,18 @@ class LoroText:
         """
         ...
 
+    def mark_utf8(self, start: int, end: int, key: str, value: LoroValue) -> None:
+        r"""
+        Mark a range of text using UTF-8 offsets.
+        """
+        ...
+
+    def mark_utf16(self, start: int, end: int, key: str, value: LoroValue) -> None:
+        r"""
+        Mark a range of text using UTF-16 offsets.
+        """
+        ...
+
     def unmark(self, start: int, end: int, key: str) -> None:
         r"""
         Unmark a range of text with a key and a value.
@@ -1687,6 +1745,12 @@ class LoroText:
         *You should make sure that a key is always associated with the same expand type.*
 
         Note: you cannot delete unmergeable annotations like comments by this method.
+        """
+        ...
+
+    def unmark_utf16(self, start: int, end: int, key: str) -> None:
+        r"""
+        Unmark a UTF-16 range of text with a key.
         """
         ...
 
@@ -2581,6 +2645,13 @@ class Side(Enum):
     Left = "left"
     Middle = "middle"
     Right = "right"
+
+class PositionType(Enum):
+    Bytes = "bytes"
+    Unicode = "unicode"
+    Utf16 = "utf16"
+    Event = "event"
+    Entity = "entity"
 
 class TextDelta:
     class Retain(TextDelta):

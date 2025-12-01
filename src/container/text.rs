@@ -1,4 +1,4 @@
-use loro::{ContainerTrait, LoroText as LoroTextInner, PeerID};
+use loro::{cursor::PosType, ContainerTrait, LoroText as LoroTextInner, PeerID};
 use pyo3::{
     exceptions::{PyIndexError, PyTypeError, PyValueError},
     prelude::*,
@@ -18,6 +18,7 @@ pub fn register_class(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<LoroText>()?;
     m.add_class::<Cursor>()?;
     m.add_class::<Side>()?;
+    m.add_class::<PositionType>()?;
     Ok(())
 }
 
@@ -82,6 +83,12 @@ impl LoroText {
         Ok(())
     }
 
+    /// Insert a string at the given utf-16 position.
+    pub fn insert_utf16(&self, pos: usize, s: &str) -> PyLoroResult<()> {
+        self.0.insert_utf16(pos, s)?;
+        Ok(())
+    }
+
     /// Delete a range of text at the given unicode position with unicode length.
     pub fn delete(&self, pos: usize, len: usize) -> PyLoroResult<()> {
         self.0.delete(pos, len)?;
@@ -94,10 +101,35 @@ impl LoroText {
         Ok(())
     }
 
+    /// Delete a range of text at the given utf-16 position with utf-16 length.
+    pub fn delete_utf16(&self, pos: usize, len: usize) -> PyLoroResult<()> {
+        self.0.delete_utf16(pos, len)?;
+        Ok(())
+    }
+
     /// Get a string slice at the given Unicode range
     pub fn slice(&self, start_index: usize, end_index: usize) -> PyLoroResult<String> {
         let s = self.0.slice(start_index, end_index)?;
         Ok(s)
+    }
+
+    /// Get a string slice at the given UTF-16 range
+    pub fn slice_utf16(&self, start_index: usize, end_index: usize) -> PyLoroResult<String> {
+        let s = self.0.slice_utf16(start_index, end_index)?;
+        Ok(s)
+    }
+
+    /// Get the rich-text delta within a range with the given position type.
+    pub fn slice_delta(
+        &self,
+        start_index: usize,
+        end_index: usize,
+        pos_type: PositionType,
+    ) -> PyLoroResult<Vec<TextDelta>> {
+        self.0
+            .slice_delta(start_index, end_index, pos_type.into())
+            .map(|d| d.iter().map(TextDelta::from).collect())
+            .map_err(PyLoroError::from)
     }
 
     /// Get the characters at given unicode position.
@@ -110,6 +142,12 @@ impl LoroText {
     pub fn splice(&self, pos: usize, len: usize, s: &str) -> PyLoroResult<String> {
         let s = self.0.splice(pos, len, s)?;
         Ok(s)
+    }
+
+    /// Delete specified range and insert a string at the same UTF-16 position.
+    pub fn splice_utf16(&self, pos: usize, len: usize, s: &str) -> PyLoroResult<()> {
+        self.0.splice_utf16(pos, len, s)?;
+        Ok(())
     }
 
     /// Whether the text container is empty.
@@ -291,6 +329,28 @@ impl LoroText {
         Ok(())
     }
 
+    pub fn mark_utf8(
+        &self,
+        start: usize,
+        end: usize,
+        key: &str,
+        value: LoroValue,
+    ) -> PyLoroResult<()> {
+        self.0.mark_utf8(start..end, key, value)?;
+        Ok(())
+    }
+
+    pub fn mark_utf16(
+        &self,
+        start: usize,
+        end: usize,
+        key: &str,
+        value: LoroValue,
+    ) -> PyLoroResult<()> {
+        self.0.mark_utf16(start..end, key, value)?;
+        Ok(())
+    }
+
     /// Unmark a range of text with a key and a value.
     ///
     /// You can use it to remove highlights, bolds or links
@@ -309,6 +369,11 @@ impl LoroText {
     /// Note: you cannot delete unmergeable annotations like comments by this method.
     pub fn unmark(&self, start: usize, end: usize, key: &str) -> PyLoroResult<()> {
         self.0.unmark(start..end, key)?;
+        Ok(())
+    }
+
+    pub fn unmark_utf16(&self, start: usize, end: usize, key: &str) -> PyLoroResult<()> {
+        self.0.unmark_utf16(start..end, key)?;
         Ok(())
     }
 
@@ -427,6 +492,16 @@ impl LoroText {
         }));
         subscription.map(|s| s.into())
     }
+
+    /// Convert a position between coordinate systems.
+    pub fn convert_pos(
+        &self,
+        index: usize,
+        from_: PositionType,
+        to: PositionType,
+    ) -> Option<usize> {
+        self.0.convert_pos(index, from_.into(), to.into())
+    }
 }
 
 #[pyclass(eq, eq_int)]
@@ -435,6 +510,28 @@ pub enum Side {
     Left = -1,
     Middle = 0,
     Right = 1,
+}
+
+#[pyclass(eq, eq_int)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub enum PositionType {
+    Bytes,
+    Unicode,
+    Utf16,
+    Event,
+    Entity,
+}
+
+impl From<PositionType> for PosType {
+    fn from(value: PositionType) -> Self {
+        match value {
+            PositionType::Bytes => PosType::Bytes,
+            PositionType::Unicode => PosType::Unicode,
+            PositionType::Utf16 => PosType::Utf16,
+            PositionType::Event => PosType::Event,
+            PositionType::Entity => PosType::Entity,
+        }
+    }
 }
 
 #[pyclass(str, frozen)]
