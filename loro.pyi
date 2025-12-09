@@ -781,6 +781,17 @@ class LoroDoc:
         """
         ...
 
+    def subscribe_jsonpath(
+        self, path: str, callback: typing.Callable[[], None]
+    ) -> Subscription:
+        r"""
+        Subscribe to updates that might affect the given JSONPath query.
+
+        The callback may fire with false positives; use it as a lightweight signal before running
+        JSONPath yourself.
+        """
+        ...
+
     def get_pending_txn_len(self) -> int:
         r"""
         Get the number of operations in the pending transaction.

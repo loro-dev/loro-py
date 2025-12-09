@@ -868,6 +868,21 @@ impl LoroDoc {
             .map_err(|e| PyValueError::new_err(e.to_string()))
     }
 
+    /// Subscribe to updates that might affect the given JSONPath query.
+    ///
+    /// The callback may fire false positives; it is intended as a lightweight notification so
+    /// callers can debounce or throttle before running an expensive JSONPath query themselves.
+    pub fn subscribe_jsonpath(&self, path: &str, callback: Py<PyAny>) -> PyLoroResult<Subscription> {
+        let subscription = self
+            .doc
+            .subscribe_jsonpath(path, Arc::new(move || {
+                Python::attach(|py| {
+                    callback.call0(py).unwrap();
+                });
+            }))?;
+        Ok(subscription.into())
+    }
+
     /// Get the number of operations in the pending transaction.
     ///
     /// The pending transaction is the one that is not committed yet. It will be committed
