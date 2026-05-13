@@ -32,3 +32,14 @@ def test_apply_diff():
     doc1.commit()
     doc2.apply_diff(doc1.diff(f1, doc1.oplog_frontiers))
     assert doc2.get_text("text").to_string() == "abc"
+
+def test_try_get_container_methods():
+    doc = LoroDoc()
+    text = doc.get_text("text")
+    text.insert(0, "abc")
+    doc.commit()
+
+    assert doc.try_get_text("text").to_string() == "abc"
+    assert doc.try_get_text("missing") is not None
+    assert doc.try_get_text(text.id) is not None
+    assert doc.try_get_map(text.id) is None

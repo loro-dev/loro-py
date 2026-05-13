@@ -76,9 +76,9 @@ impl LoroDoc {
     /// Fork the document at the given frontiers.
     ///
     /// The created doc will only contain the history before the specified frontiers.
-    pub fn fork_at(&self, frontiers: &Frontiers) -> Self {
-        let new_doc = self.doc.fork_at(&frontiers.into());
-        Self { doc: new_doc }
+    pub fn fork_at(&self, frontiers: &Frontiers) -> PyLoroResult<Self> {
+        let new_doc = self.doc.fork_at(&frontiers.into())?;
+        Ok(Self { doc: new_doc })
     }
 
     /// Get the configurations of the document.
@@ -287,6 +287,21 @@ impl LoroDoc {
         Ok(LoroMovableList(self.doc.get_movable_list(container_id)))
     }
 
+    /// Try to get a [LoroMovableList] by container id.
+    ///
+    /// Returns `None` if the container does not exist.
+    #[inline]
+    pub fn try_get_movable_list(
+        &self,
+        obj: &Bound<'_, PyAny>,
+    ) -> PyResult<Option<LoroMovableList>> {
+        let container_id = pyobject_to_container_id(obj, ContainerType::MovableList {})?;
+        Ok(self
+            .doc
+            .try_get_movable_list(container_id)
+            .map(LoroMovableList))
+    }
+
     /// Get a [LoroList] by container id.
     ///
     /// If the provided id is string, it will be converted into a root container id with the name of the string.
@@ -294,6 +309,15 @@ impl LoroDoc {
     pub fn get_list(&self, obj: &Bound<'_, PyAny>) -> PyResult<LoroList> {
         let container_id = pyobject_to_container_id(obj, ContainerType::List {})?;
         Ok(LoroList(self.doc.get_list(container_id)))
+    }
+
+    /// Try to get a [LoroList] by container id.
+    ///
+    /// Returns `None` if the container does not exist.
+    #[inline]
+    pub fn try_get_list(&self, obj: &Bound<'_, PyAny>) -> PyResult<Option<LoroList>> {
+        let container_id = pyobject_to_container_id(obj, ContainerType::List {})?;
+        Ok(self.doc.try_get_list(container_id).map(LoroList))
     }
 
     /// Get a [LoroMap] by container id.
@@ -305,6 +329,15 @@ impl LoroDoc {
         Ok(LoroMap(self.doc.get_map(container_id)))
     }
 
+    /// Try to get a [LoroMap] by container id.
+    ///
+    /// Returns `None` if the container does not exist.
+    #[inline]
+    pub fn try_get_map(&self, obj: &Bound<'_, PyAny>) -> PyResult<Option<LoroMap>> {
+        let container_id = pyobject_to_container_id(obj, ContainerType::Map {})?;
+        Ok(self.doc.try_get_map(container_id).map(LoroMap))
+    }
+
     /// Get a [LoroText] by container id.
     ///
     /// If the provided id is string, it will be converted into a root container id with the name of the string.
@@ -312,6 +345,15 @@ impl LoroDoc {
     pub fn get_text(&self, obj: &Bound<'_, PyAny>) -> PyResult<LoroText> {
         let container_id = pyobject_to_container_id(obj, ContainerType::Text {})?;
         Ok(LoroText(self.doc.get_text(container_id)))
+    }
+
+    /// Try to get a [LoroText] by container id.
+    ///
+    /// Returns `None` if the container does not exist.
+    #[inline]
+    pub fn try_get_text(&self, obj: &Bound<'_, PyAny>) -> PyResult<Option<LoroText>> {
+        let container_id = pyobject_to_container_id(obj, ContainerType::Text {})?;
+        Ok(self.doc.try_get_text(container_id).map(LoroText))
     }
 
     /// Get a [LoroTree] by container id.
@@ -323,6 +365,15 @@ impl LoroDoc {
         Ok(LoroTree(self.doc.get_tree(container_id)))
     }
 
+    /// Try to get a [LoroTree] by container id.
+    ///
+    /// Returns `None` if the container does not exist.
+    #[inline]
+    pub fn try_get_tree(&self, obj: &Bound<'_, PyAny>) -> PyResult<Option<LoroTree>> {
+        let container_id = pyobject_to_container_id(obj, ContainerType::Tree {})?;
+        Ok(self.doc.try_get_tree(container_id).map(LoroTree))
+    }
+
     /// Get a [LoroCounter] by container id.
     ///
     /// If the provided id is string, it will be converted into a root container id with the name of the string.
@@ -330,6 +381,15 @@ impl LoroDoc {
     pub fn get_counter(&self, obj: &Bound<'_, PyAny>) -> PyResult<LoroCounter> {
         let container_id = pyobject_to_container_id(obj, ContainerType::Counter {})?;
         Ok(LoroCounter(self.doc.get_counter(container_id)))
+    }
+
+    /// Try to get a [LoroCounter] by container id.
+    ///
+    /// Returns `None` if the container does not exist.
+    #[inline]
+    pub fn try_get_counter(&self, obj: &Bound<'_, PyAny>) -> PyResult<Option<LoroCounter>> {
+        let container_id = pyobject_to_container_id(obj, ContainerType::Counter {})?;
+        Ok(self.doc.try_get_counter(container_id).map(LoroCounter))
     }
 
     /// Commit the cumulative auto commit transaction.
@@ -872,14 +932,19 @@ impl LoroDoc {
     ///
     /// The callback may fire false positives; it is intended as a lightweight notification so
     /// callers can debounce or throttle before running an expensive JSONPath query themselves.
-    pub fn subscribe_jsonpath(&self, path: &str, callback: Py<PyAny>) -> PyLoroResult<Subscription> {
-        let subscription = self
-            .doc
-            .subscribe_jsonpath(path, Arc::new(move || {
+    pub fn subscribe_jsonpath(
+        &self,
+        path: &str,
+        callback: Py<PyAny>,
+    ) -> PyLoroResult<Subscription> {
+        let subscription = self.doc.subscribe_jsonpath(
+            path,
+            Arc::new(move || {
                 Python::attach(|py| {
                     callback.call0(py).unwrap();
                 });
-            }))?;
+            }),
+        )?;
         Ok(subscription.into())
     }
 
@@ -1124,7 +1189,7 @@ impl Configure {
     }
 
     pub fn text_style_config(&self) -> StyleConfigMap {
-        StyleConfigMap(self.0.text_style_config().read().unwrap().clone())
+        StyleConfigMap(self.0.text_style_config().read().clone())
     }
 
     pub fn record_timestamp(&self) -> bool {
