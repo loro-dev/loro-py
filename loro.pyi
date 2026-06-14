@@ -425,11 +425,29 @@ class LoroDoc:
         """
         ...
 
+    def try_get_movable_list(
+        self, obj: ContainerId
+    ) -> typing.Optional[LoroMovableList]:
+        r"""
+        Try to get a [LoroMovableList] by container id.
+
+        Returns `None` if the container does not exist.
+        """
+        ...
+
     def get_list(self, obj: ContainerId) -> LoroList:
         r"""
         Get a [LoroList] by container id.
 
         If the provided id is string, it will be converted into a root container id with the name of the string.
+        """
+        ...
+
+    def try_get_list(self, obj: ContainerId) -> typing.Optional[LoroList]:
+        r"""
+        Try to get a [LoroList] by container id.
+
+        Returns `None` if the container does not exist.
         """
         ...
 
@@ -441,11 +459,27 @@ class LoroDoc:
         """
         ...
 
+    def try_get_map(self, obj: ContainerId) -> typing.Optional[LoroMap]:
+        r"""
+        Try to get a [LoroMap] by container id.
+
+        Returns `None` if the container does not exist.
+        """
+        ...
+
     def get_text(self, obj: ContainerId) -> LoroText:
         r"""
         Get a [LoroText] by container id.
 
         If the provided id is string, it will be converted into a root container id with the name of the string.
+        """
+        ...
+
+    def try_get_text(self, obj: ContainerId) -> typing.Optional[LoroText]:
+        r"""
+        Try to get a [LoroText] by container id.
+
+        Returns `None` if the container does not exist.
         """
         ...
 
@@ -457,11 +491,27 @@ class LoroDoc:
         """
         ...
 
+    def try_get_tree(self, obj: ContainerId) -> typing.Optional[LoroTree]:
+        r"""
+        Try to get a [LoroTree] by container id.
+
+        Returns `None` if the container does not exist.
+        """
+        ...
+
     def get_counter(self, obj: typing.Any) -> LoroCounter:
         r"""
         Get a [LoroCounter] by container id.
 
         If the provided id is string, it will be converted into a root container id with the name of the string.
+        """
+        ...
+
+    def try_get_counter(self, obj: typing.Any) -> typing.Optional[LoroCounter]:
+        r"""
+        Try to get a [LoroCounter] by container id.
+
+        Returns `None` if the container does not exist.
         """
         ...
 
@@ -1305,6 +1355,18 @@ class LoroMap:
         Get or create a container with the given key.
         """
         ...
+
+    def ensure_mergeable_list(self, key: str) -> LoroList: ...
+
+    def ensure_mergeable_map(self, key: str) -> LoroMap: ...
+
+    def ensure_mergeable_tree(self, key: str) -> LoroTree: ...
+
+    def ensure_mergeable_movable_list(self, key: str) -> LoroMovableList: ...
+
+    def ensure_mergeable_text(self, key: str) -> LoroText: ...
+
+    def ensure_mergeable_counter(self, key: str) -> LoroCounter: ...
 
     def clear(self) -> None:
         r"""

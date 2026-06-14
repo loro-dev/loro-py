@@ -10,7 +10,7 @@ use crate::{
     value::{ContainerID, LoroValue, ValueOrContainer},
 };
 
-use super::Container;
+use super::{Container, LoroCounter, LoroList, LoroMovableList, LoroText, LoroTree};
 
 pub fn register_class(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<LoroMap>()?;
@@ -148,6 +148,30 @@ impl LoroMap {
             .0
             .get_or_create_container(key, loro::Container::from(child))?;
         Ok(container.into())
+    }
+
+    pub fn ensure_mergeable_list(&self, key: &str) -> PyLoroResult<LoroList> {
+        Ok(LoroList(self.0.ensure_mergeable_list(key)?))
+    }
+
+    pub fn ensure_mergeable_map(&self, key: &str) -> PyLoroResult<LoroMap> {
+        Ok(LoroMap(self.0.ensure_mergeable_map(key)?))
+    }
+
+    pub fn ensure_mergeable_tree(&self, key: &str) -> PyLoroResult<LoroTree> {
+        Ok(LoroTree(self.0.ensure_mergeable_tree(key)?))
+    }
+
+    pub fn ensure_mergeable_movable_list(&self, key: &str) -> PyLoroResult<LoroMovableList> {
+        Ok(LoroMovableList(self.0.ensure_mergeable_movable_list(key)?))
+    }
+
+    pub fn ensure_mergeable_text(&self, key: &str) -> PyLoroResult<LoroText> {
+        Ok(LoroText(self.0.ensure_mergeable_text(key)?))
+    }
+
+    pub fn ensure_mergeable_counter(&self, key: &str) -> PyLoroResult<LoroCounter> {
+        Ok(LoroCounter(self.0.ensure_mergeable_counter(key)?))
     }
 
     /// Delete all key-value pairs in the map.
