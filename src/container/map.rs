@@ -144,6 +144,7 @@ impl LoroMap {
 
     /// Get or create a container with the given key.
     pub fn get_or_create_container(&self, key: &str, child: Container) -> PyLoroResult<Container> {
+        #[allow(deprecated)]
         let container = self
             .0
             .get_or_create_container(key, loro::Container::from(child))?;
