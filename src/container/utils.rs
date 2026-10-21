@@ -14,7 +14,7 @@ pub enum SliceOrInt<'py> {
 
 pub fn py_any_to_loro_values(obj: &Bound<'_, PyAny>) -> PyResult<Vec<CoreLoroValue>> {
     let sequence = obj
-        .downcast::<PySequence>()
+        .cast::<PySequence>()
         .map_err(|_| PyTypeError::new_err("can only assign an iterable to a slice"))?;
 
     let length = sequence.len()?;

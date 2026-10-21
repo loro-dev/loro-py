@@ -18,7 +18,7 @@ pub fn register_class(m: &Bound<'_, PyModule>) -> PyResult<()> {
     Ok(())
 }
 
-#[pyclass(eq, str, get_all, set_all)]
+#[pyclass(eq, str, get_all, set_all, from_py_object)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ID {
     pub peer: u64,
@@ -39,7 +39,7 @@ impl ID {
     }
 }
 
-#[pyclass(eq, str, get_all, set_all)]
+#[pyclass(eq, str, get_all, set_all, from_py_object)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct IdLp {
     pub peer: u64,
@@ -52,7 +52,7 @@ impl Display for IdLp {
     }
 }
 
-#[pyclass(eq, hash, str)]
+#[pyclass(eq, hash, str, from_py_object)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum ContainerType {
     Text {},
@@ -70,7 +70,7 @@ impl Display for ContainerType {
     }
 }
 
-#[pyclass(eq, str, hash)]
+#[pyclass(eq, str, hash, from_py_object)]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum ContainerID {
     Root {
@@ -90,7 +90,7 @@ impl Display for ContainerID {
     }
 }
 
-#[pyclass(eq, str, eq_int)]
+#[pyclass(eq, str, eq_int, from_py_object)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Ordering {
     Less,
@@ -114,7 +114,7 @@ impl From<std::cmp::Ordering> for Ordering {
     }
 }
 
-#[pyclass(eq, str, get_all, set_all)]
+#[pyclass(eq, str, get_all, set_all, from_py_object)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct TreeID {
     pub peer: PeerID,
@@ -137,7 +137,7 @@ impl TreeID {
 
 pub type TreeParentId = Option<TreeID>;
 
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Clone)]
 pub enum ValueOrContainer {
     Value { value: LoroValue },
@@ -176,9 +176,11 @@ impl ValueOrContainer {
 #[derive(Debug, Clone)]
 pub struct LoroValue(pub(crate) loro::LoroValue);
 
-impl<'py> FromPyObject<'py> for LoroValue {
-    fn extract_bound(ob: &Bound<'py, PyAny>) -> PyResult<Self> {
-        let value = pyobject_to_loro_value(ob)?;
+impl<'a, 'py> FromPyObject<'a, 'py> for LoroValue {
+    type Error = PyErr;
+
+    fn extract(ob: Borrowed<'a, 'py, PyAny>) -> PyResult<Self> {
+        let value = pyobject_to_loro_value(&ob)?;
         Ok(Self(value))
     }
 }

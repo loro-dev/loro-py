@@ -21,7 +21,7 @@ impl LoroCounter {
     }
 }
 
-#[pyclass(frozen)]
+#[pyclass(frozen, from_py_object)]
 #[derive(Debug, Clone, Default)]
 pub struct LoroCounter(pub LoroCounterInner);
 

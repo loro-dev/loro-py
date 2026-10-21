@@ -49,10 +49,10 @@ pub fn pyobject_to_container_id(
     obj: &Bound<'_, PyAny>,
     ty: ContainerType,
 ) -> PyResult<loro::ContainerID> {
-    if let Ok(value) = obj.downcast::<PyString>() {
+    if let Ok(value) = obj.cast::<PyString>() {
         return Ok(loro::ContainerID::new_root(value.to_str()?, ty.into()));
     }
-    if let Ok(value) = obj.downcast::<ContainerID>() {
+    if let Ok(value) = obj.cast::<ContainerID>() {
         return Ok(loro::ContainerID::from(value.get()));
     }
 
@@ -73,27 +73,27 @@ pub fn pyobject_to_loro_value(obj: &Bound<'_, PyAny>) -> PyResult<loro::LoroValu
     if let Ok(value) = obj.extract::<f64>() {
         return Ok(loro::LoroValue::Double(value));
     }
-    if let Ok(value) = obj.downcast::<PyBytes>() {
+    if let Ok(value) = obj.cast::<PyBytes>() {
         return Ok(loro::LoroValue::Binary(loro::LoroBinaryValue::from(
             value.as_bytes().to_vec(),
         )));
     }
-    if let Ok(value) = obj.downcast::<PyString>() {
+    if let Ok(value) = obj.cast::<PyString>() {
         return Ok(loro::LoroValue::String(loro::LoroStringValue::from(
             value.to_string(),
         )));
     }
-    if let Ok(value) = obj.downcast::<PyList>() {
+    if let Ok(value) = obj.cast::<PyList>() {
         let mut list = Vec::with_capacity(value.len());
         for item in value.iter() {
             list.push(pyobject_to_loro_value(&item)?);
         }
         return Ok(loro::LoroValue::List(loro::LoroListValue::from(list)));
     }
-    if let Ok(value) = obj.downcast::<PyDict>() {
+    if let Ok(value) = obj.cast::<PyDict>() {
         let mut map = FxHashMap::default();
         for (key, value) in value.iter() {
-            if key.downcast::<PyString>().is_ok() {
+            if key.cast::<PyString>().is_ok() {
                 map.insert(key.to_string(), pyobject_to_loro_value(&value)?);
             } else {
                 return Err(PyTypeError::new_err(
@@ -103,10 +103,10 @@ pub fn pyobject_to_loro_value(obj: &Bound<'_, PyAny>) -> PyResult<loro::LoroValu
         }
         return Ok(loro::LoroValue::Map(loro::LoroMapValue::from(map)));
     }
-    if let Ok(value) = obj.downcast::<PyMapping>() {
+    if let Ok(value) = obj.cast::<PyMapping>() {
         let mut map = FxHashMap::default();
         for key in value.keys()? {
-            if key.downcast::<PyString>().is_ok() {
+            if key.cast::<PyString>().is_ok() {
                 map.insert(
                     key.to_string(),
                     pyobject_to_loro_value(&value.get_item(key).unwrap())?,
@@ -119,7 +119,7 @@ pub fn pyobject_to_loro_value(obj: &Bound<'_, PyAny>) -> PyResult<loro::LoroValu
         }
         return Ok(loro::LoroValue::Map(loro::LoroMapValue::from(map)));
     }
-    if let Ok(value) = obj.downcast::<ContainerID>() {
+    if let Ok(value) = obj.cast::<ContainerID>() {
         return Ok(loro::LoroValue::Container(value.get().clone().into()));
     }
     Err(PyTypeError::new_err("Invalid LoroValue"))

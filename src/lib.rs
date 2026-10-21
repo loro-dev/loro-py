@@ -13,7 +13,7 @@ mod value;
 mod version;
 
 /// Python bindings for Loro
-#[pymodule(name = "loro")]
+#[pymodule(name = "loro", gil_used = true)]
 fn loro_py(_py: Python<'_>, m: &Bound<'_, PyModule>) -> PyResult<()> {
     doc::register_class(m)?;
     container::register_class(m)?;
