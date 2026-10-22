@@ -17,6 +17,7 @@ jobs:
   linux:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
+      fail-fast: false
       matrix:
         platform:
           - runner: ubuntu-22.04
@@ -41,7 +42,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --find-interpreter
+          args: --release --locked --out dist --interpreter python${{ matrix.python-version }}
           sccache: "true"
           manylinux: auto
       - name: Upload wheels
@@ -53,6 +54,7 @@ jobs:
   musllinux:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
+      fail-fast: false
       matrix:
         platform:
           - runner: ubuntu-22.04
@@ -73,7 +75,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --find-interpreter
+          args: --release --locked --out dist --interpreter python${{ matrix.python-version }}
           sccache: "true"
           manylinux: musllinux_1_2
       - name: Upload wheels
@@ -85,6 +87,7 @@ jobs:
   windows:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
+      fail-fast: false
       matrix:
         platform:
           - runner: windows-latest
@@ -102,7 +105,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --find-interpreter
+          args: --release --locked --out dist --interpreter python
           sccache: "true"
       - name: Upload wheels
         uses: actions/upload-artifact@v4
@@ -113,6 +116,7 @@ jobs:
   macos:
     runs-on: ${{ matrix.platform.runner }}
     strategy:
+      fail-fast: false
       matrix:
         platform:
           - runner: macos-15-intel
@@ -129,7 +133,7 @@ jobs:
         uses: PyO3/maturin-action@v1
         with:
           target: ${{ matrix.platform.target }}
-          args: --release --out dist --find-interpreter
+          args: --release --locked --out dist --interpreter python
           sccache: "true"
       - name: Upload wheels
         uses: actions/upload-artifact@v4
