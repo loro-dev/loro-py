@@ -788,6 +788,14 @@ class LoroDoc:
         """
         ...
 
+    def export_pending_updates(self) -> typing.Optional[bytes]:
+        """Export remote updates waiting for dependencies without committing local edits.
+
+        Save with a consistent snapshot. Restore the snapshot first, then import
+        these bytes. None means no received updates are pending.
+        """
+        ...
+
     def get_path_to_container(
         self, id: ContainerID
     ) -> typing.Optional[list[tuple[ContainerID, Index]]]:
