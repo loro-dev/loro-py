@@ -515,11 +515,15 @@ impl LoroDoc {
     // TODO: return an object
     /// Export the current state with json-string format of the document.
     #[inline]
-    pub fn export_json_updates(&self, start_vv: VersionVector, end_vv: VersionVector) -> String {
+    pub fn export_json_updates(
+        &self,
+        start_vv: VersionVector,
+        end_vv: VersionVector,
+    ) -> PyLoroResult<String> {
         let json = self
             .doc
-            .export_json_updates(&start_vv.into(), &end_vv.into());
-        serde_json::to_string(&json).unwrap()
+            .export_json_updates(&start_vv.into(), &end_vv.into())?;
+        serde_json::to_string(&json).map_err(|error| PyLoroError::Error(error.to_string()))
     }
 
     /// Exports changes within the specified ID span to JSON schema format.
@@ -871,6 +875,15 @@ impl LoroDoc {
     pub fn export(&self, mode: ExportMode) -> PyLoroResult<Cow<'_, [u8]>> {
         let ans = self.doc.export(mode.into())?;
         Ok(Cow::Owned(ans))
+    }
+
+    /// Export received remote updates that are waiting for missing dependencies.
+    ///
+    /// Returns None when nothing is pending. Save these bytes together with a
+    /// consistent snapshot, then restore the snapshot before importing these bytes.
+    /// This does not commit local edits or consume pending updates.
+    pub fn export_pending_updates(&self) -> PyLoroResult<Option<Cow<'_, [u8]>>> {
+        Ok(self.doc.export_pending_updates()?.map(Cow::Owned))
     }
 
     // /// Analyze the container info of the doc

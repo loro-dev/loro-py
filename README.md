@@ -68,3 +68,12 @@ cd loro-py
 pip install maturin
 maturin develop
 ```
+
+## 1.17.1
+
+Uses Loro core 1.17.1. Adds `LoroDoc.export_pending_updates()` to persist received
+updates waiting for missing dependencies alongside a consistent snapshot. Restore
+the snapshot first, then import the pending bytes. `None` means nothing is pending;
+clear any previously saved pending bytes when replacing a checkpoint with `None`.
+JSON export keeps returning the existing JSON string and reports history decode
+failures as Python exceptions. The `state_vv` property retains its existing type.
