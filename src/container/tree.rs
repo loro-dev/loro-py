@@ -19,7 +19,7 @@ pub fn register_class(m: &Bound<'_, PyModule>) -> PyResult<()> {
     Ok(())
 }
 
-#[pyclass(frozen)]
+#[pyclass(frozen, from_py_object)]
 #[derive(Debug, Clone, Default)]
 pub struct LoroTree(pub LoroTreeInner);
 
@@ -373,7 +373,7 @@ impl LoroTree {
 }
 
 /// A tree node in the [LoroTree].
-#[pyclass(str, get_all, set_all)]
+#[pyclass(str, get_all, set_all, from_py_object)]
 #[derive(Debug, Clone)]
 pub struct TreeNode {
     /// ID of the tree node.

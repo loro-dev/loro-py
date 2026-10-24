@@ -138,9 +138,9 @@ impl EphemeralStore {
         self.0.keys()
     }
 
-    pub fn subscribe_local_updates(&self, callback: PyObject) -> Subscription {
+    pub fn subscribe_local_updates(&self, callback: Py<PyAny>) -> Subscription {
         let subscription = self.0.subscribe_local_updates(Box::new(move |updates| {
-            Python::with_gil(|py| {
+            Python::attach(|py| {
                 let b = callback.call1(py, (updates,)).unwrap();
                 b.extract::<bool>(py).unwrap()
             })
@@ -148,9 +148,9 @@ impl EphemeralStore {
         subscription.into()
     }
 
-    pub fn subscribe(&self, callback: PyObject) -> Subscription {
+    pub fn subscribe(&self, callback: Py<PyAny>) -> Subscription {
         let subscription = self.0.subscribe(Box::new(move |updates| {
-            Python::with_gil(|py| {
+            Python::attach(|py| {
                 let b = callback
                     .call1(
                         py,

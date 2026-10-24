@@ -17,7 +17,7 @@ pub fn register_class(m: &Bound<'_, PyModule>) -> PyResult<()> {
     Ok(())
 }
 
-#[pyclass(frozen, mapping)]
+#[pyclass(frozen, mapping, from_py_object)]
 #[derive(Debug, Clone, Default)]
 pub struct LoroMap(pub LoroMapInner);
 

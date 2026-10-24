@@ -22,7 +22,7 @@ pub fn register_class(m: &Bound<'_, PyModule>) -> PyResult<()> {
     Ok(())
 }
 
-#[pyclass(frozen)]
+#[pyclass(frozen, from_py_object)]
 #[derive(Debug, Clone, Default)]
 pub struct LoroText(pub LoroTextInner);
 
@@ -177,7 +177,7 @@ impl LoroText {
             let mut buf = [0u8; 4];
             let as_str = ch.encode_utf8(&mut buf);
             Ok(PyString::new(py, as_str).into_any())
-        } else if let Ok(slice) = key.downcast::<PySlice>() {
+        } else if let Ok(slice) = key.cast::<PySlice>() {
             let text = self.0.to_string();
             let py_str = PyString::new(py, &text);
             py_str.get_item(slice)
@@ -504,7 +504,7 @@ impl LoroText {
     }
 }
 
-#[pyclass(eq, eq_int)]
+#[pyclass(eq, eq_int, from_py_object)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum Side {
     Left = -1,
@@ -512,7 +512,7 @@ pub enum Side {
     Right = 1,
 }
 
-#[pyclass(eq, eq_int)]
+#[pyclass(eq, eq_int, from_py_object)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum PositionType {
     Bytes,
@@ -534,7 +534,7 @@ impl From<PositionType> for PosType {
     }
 }
 
-#[pyclass(str, frozen)]
+#[pyclass(str, frozen, from_py_object)]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Cursor(pub loro::cursor::Cursor);
 

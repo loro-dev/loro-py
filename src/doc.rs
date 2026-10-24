@@ -1170,7 +1170,7 @@ pub struct PreCommitCallbackPayload {
     pub modifier: ChangeModifier,
 }
 
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Clone)]
 pub struct ChangeModifier(loro::ChangeModifier);
 
@@ -1253,7 +1253,7 @@ impl Display for ImportStatus {
     }
 }
 
-#[pyclass(get_all, str)]
+#[pyclass(get_all, str, from_py_object)]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct PosQueryResult {
     pub update: Option<Cursor>,
@@ -1266,7 +1266,7 @@ impl Display for PosQueryResult {
     }
 }
 
-#[pyclass(get_all, str)]
+#[pyclass(get_all, str, from_py_object)]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AbsolutePosition {
     pub pos: usize,
@@ -1280,7 +1280,7 @@ impl Display for AbsolutePosition {
     }
 }
 
-#[pyclass]
+#[pyclass(from_py_object)]
 #[derive(Debug, Clone)]
 pub enum ExportMode {
     Snapshot {},
@@ -1293,7 +1293,7 @@ pub enum ExportMode {
 
 /// This struct supports reverse repr: [CounterSpan]'s from can be less than to. But we should use it conservatively.
 /// We need this because it'll make merging deletions easier.
-#[pyclass(get_all, str)]
+#[pyclass(get_all, str, from_py_object)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IdSpan {
     pub peer: PeerID,
@@ -1319,7 +1319,7 @@ impl IdSpan {
 ///
 /// But we should use it behavior conservatively.
 /// If it is not necessary to be reverse, it should not.
-#[pyclass(get_all, str)]
+#[pyclass(get_all, str, from_py_object)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct CounterSpan {
     pub start: Counter,
@@ -1340,7 +1340,7 @@ impl Display for CounterSpan {
     }
 }
 
-#[pyclass(get_all, str)]
+#[pyclass(get_all, str, from_py_object)]
 #[derive(Debug, Clone)]
 pub struct ChangeMeta {
     /// Lamport timestamp of the Change
@@ -1364,7 +1364,7 @@ impl Display for ChangeMeta {
     }
 }
 
-#[pyclass(get_all, str)]
+#[pyclass(get_all, str, from_py_object)]
 #[derive(Debug, Clone)]
 pub struct ImportBlobMetadata {
     /// The partial start version vector.
@@ -1392,7 +1392,7 @@ impl Display for ImportBlobMetadata {
     }
 }
 
-#[pyclass(eq, eq_int)]
+#[pyclass(eq, eq_int, from_py_object)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub enum EncodedBlobMode {
     Snapshot,
@@ -1402,7 +1402,7 @@ pub enum EncodedBlobMode {
     Updates,
 }
 
-#[pyclass(str)]
+#[pyclass(str, from_py_object)]
 #[derive(Debug, Clone, Default)]
 pub struct StyleConfigMap(loro::StyleConfigMap);
 
@@ -1448,7 +1448,7 @@ impl Display for StyleConfigMap {
 /// - After: when inserting new text after this style, the new text should inherit this style.
 /// - Both: when inserting new text before or after this style, the new text should inherit this style.
 /// - Null: when inserting new text before or after this style, the new text should **not** inherit this style.
-#[pyclass(eq, eq_int)]
+#[pyclass(eq, eq_int, from_py_object)]
 #[derive(Clone, Copy, Eq, PartialEq, Debug, Hash)]
 pub enum ExpandType {
     Before,

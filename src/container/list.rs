@@ -17,7 +17,7 @@ use crate::{
 
 use super::{Container, Cursor, Side};
 
-#[pyclass(frozen, sequence)]
+#[pyclass(frozen, sequence, from_py_object)]
 #[derive(Debug, Clone, Default)]
 pub struct LoroList(pub LoroListInner);
 

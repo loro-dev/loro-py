@@ -165,21 +165,21 @@ impl UndoManager {
     }
 }
 
-#[pyclass(eq, eq_int)]
+#[pyclass(eq, eq_int, from_py_object)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum UndoOrRedo {
     Undo,
     Redo,
 }
 
-#[pyclass(get_all)]
+#[pyclass(get_all, from_py_object)]
 #[derive(Debug, Clone)]
 pub struct UndoItemMeta {
     pub value: LoroValue,
     pub cursors: Vec<CursorWithPos>,
 }
 
-#[pyclass(get_all)]
+#[pyclass(get_all, from_py_object)]
 #[derive(Debug, Clone)]
 pub struct CursorWithPos {
     pub cursor: Cursor,

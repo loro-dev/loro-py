@@ -3,7 +3,7 @@ use pyo3::prelude::*;
 
 use crate::{doc::LoroDoc, value::ContainerID};
 
-#[pyclass(frozen)]
+#[pyclass(frozen, from_py_object)]
 #[derive(Debug, Clone)]
 pub struct LoroUnknown(pub LoroUnknownInner);
 

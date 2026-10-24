@@ -56,7 +56,7 @@ impl fmt::Display for DiffEvent {
 }
 
 /// The kind of the event trigger.
-#[pyclass(eq, eq_int)]
+#[pyclass(eq, eq_int, from_py_object)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub enum EventTriggerKind {
     /// The event is triggered by a local transaction.
@@ -77,7 +77,7 @@ impl fmt::Display for EventTriggerKind {
     }
 }
 
-#[pyclass(get_all, str)]
+#[pyclass(get_all, str, from_py_object)]
 #[derive(Debug, Clone)]
 pub struct PathItem {
     pub container: ContainerID,
@@ -94,7 +94,7 @@ impl fmt::Display for PathItem {
     }
 }
 
-#[pyclass(get_all, str)]
+#[pyclass(get_all, str, from_py_object)]
 #[derive(Debug, Clone)]
 /// A diff of a container.
 pub struct ContainerDiff {
@@ -125,7 +125,7 @@ impl fmt::Display for ContainerDiff {
     }
 }
 
-#[pyclass(str, get_all)]
+#[pyclass(str, get_all, from_py_object)]
 #[derive(Debug, Clone)]
 pub enum Index {
     Key { key: String },
@@ -143,7 +143,7 @@ impl fmt::Display for Index {
     }
 }
 
-#[pyclass(get_all)]
+#[pyclass(get_all, from_py_object)]
 #[derive(Debug, Clone)]
 pub enum Diff {
     /// A list diff.
@@ -187,7 +187,7 @@ impl fmt::Display for Diff {
     }
 }
 
-#[pyclass(str, get_all)]
+#[pyclass(str, get_all, from_py_object)]
 #[derive(Debug, Clone)]
 pub enum TextDelta {
     Retain {
@@ -241,7 +241,7 @@ impl fmt::Display for TextDelta {
     }
 }
 
-#[pyclass(str, get_all)]
+#[pyclass(str, get_all, from_py_object)]
 #[derive(Debug, Clone)]
 pub enum ListDiffItem {
     /// Insert a new element into the list.
@@ -290,7 +290,7 @@ impl fmt::Display for ListDiffItem {
     }
 }
 
-#[pyclass(str, get_all)]
+#[pyclass(str, get_all, from_py_object)]
 #[derive(Debug, Clone)]
 pub struct MapDelta {
     /// All the updated keys and their new values.
@@ -315,7 +315,7 @@ impl fmt::Display for MapDelta {
     }
 }
 
-#[pyclass(str, get_all)]
+#[pyclass(str, get_all, from_py_object)]
 #[derive(Debug, Clone)]
 pub struct TreeDiff {
     pub diff: Vec<TreeDiffItem>,
@@ -335,7 +335,7 @@ impl fmt::Display for TreeDiff {
     }
 }
 
-#[pyclass(str, get_all)]
+#[pyclass(str, get_all, from_py_object)]
 #[derive(Debug, Clone)]
 pub struct TreeDiffItem {
     pub target: TreeID,
@@ -352,7 +352,7 @@ impl fmt::Display for TreeDiffItem {
     }
 }
 
-#[pyclass(str, get_all)]
+#[pyclass(str, get_all, from_py_object)]
 #[derive(Debug, Clone)]
 pub enum TreeExternalDiff {
     Create {
@@ -449,7 +449,7 @@ impl Subscription {
     }
 }
 
-#[pyclass(str)]
+#[pyclass(str, from_py_object)]
 #[derive(Debug, Clone, Default)]
 pub struct DiffBatch(loro::event::DiffBatch);
 

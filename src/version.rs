@@ -19,7 +19,7 @@ pub fn register_class(m: &Bound<'_, PyModule>) -> PyResult<()> {
     Ok(())
 }
 
-#[pyclass(str)]
+#[pyclass(str, from_py_object)]
 #[derive(Debug, Clone, Default)]
 pub struct Frontiers(loro::Frontiers);
 
@@ -78,7 +78,7 @@ impl From<&Frontiers> for loro::Frontiers {
     }
 }
 
-#[pyclass(str)]
+#[pyclass(str, from_py_object)]
 #[derive(Clone, Debug, PartialEq, Eq, Default)]
 pub struct VersionRange(loro::VersionRange);
 
@@ -178,7 +178,7 @@ impl From<loro::VersionRange> for VersionRange {
     }
 }
 
-#[pyclass(str)]
+#[pyclass(str, from_py_object)]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct VersionVector(loro::VersionVector);
 
@@ -358,7 +358,7 @@ impl From<loro::VersionVector> for VersionVector {
     }
 }
 
-#[pyclass(str, get_all)]
+#[pyclass(str, get_all, from_py_object)]
 #[derive(Debug, Clone)]
 pub struct VersionVectorDiff {
     pub retreat: VersionRange,
