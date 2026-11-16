@@ -69,6 +69,10 @@ pip install maturin
 maturin develop
 ```
 
+## 1.18.0
+
+Uses Loro core 1.18.0, including its import validation, undo and text correctness fixes and performance improvements. Existing Python APIs and supported platform matrix are retained.
+
 ## 1.17.1
 
 Uses Loro core 1.17.1. Adds `LoroDoc.export_pending_updates()` to persist received
