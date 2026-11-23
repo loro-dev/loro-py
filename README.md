@@ -71,7 +71,7 @@ maturin develop
 
 ## 1.19.0
 
-Uses the published Loro core 1.19.0. Existing Python APIs and the supported wheel platform matrix are retained.
+Uses the published Loro core 1.19.0. Existing Python APIs and the supported wheel platform matrix are retained. The release lockfile selects `loro-internal` 1.19.1 so native 32-bit targets accept their smaller rich-text tracker layout.
 
 ## 1.18.0
 
